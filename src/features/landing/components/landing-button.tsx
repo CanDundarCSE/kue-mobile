@@ -70,6 +70,8 @@ const styles = StyleSheet.create({
     opacity: 0.45,
   },
   label: {
+    width: "100%",
+    textAlign: "center",
     fontWeight: "700",
     letterSpacing: 0.1,
   },

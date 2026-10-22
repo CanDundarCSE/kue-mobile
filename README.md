@@ -79,11 +79,15 @@ Render's free tier sleeps after inactivity, so the first request can take
 
 ## Screens
 
-Signed-out users get a native-style landing experience: a compact top app bar,
-system typography, format chips, an interactive library preview, a swipeable
-format carousel, feature cards with live demos, an activity heatmap and a native
-FAQ list. "Sign in" opens a bottom sheet over the landing rather than navigating
-to a separate page; Android's back button dismisses the sheet.
+Signed-out users get a mobile-only, six-slide onboarding tour. The first slide is
+the pitch: a cropped preview of the library (poster rows, progress and statuses)
+with a "Start the tour" button. Returning users can tap "Skip" in the app bar on
+any slide to jump straight to the last slide, which offers "Sign in" (opens the
+bottom sheet) and "Create an account" (opens the native registration sheet),
+plus the legal links. Feature slides are advanced by swiping or tapping the centered
+progress dots — the footer has no buttons or counter. "Sign in" opens the sheet
+over the tour rather than navigating to a separate page; Android's back button
+dismisses the sheet.
 
 Signed-in users get the Home/Explore tab shell. Home currently shows the account
 card and the Render API health check; the real Kue navigation (Library, Discover,
@@ -94,18 +98,19 @@ Lists, Profile) is the next step.
 - `src/app/_layout.tsx` — fonts, providers, auth gate
 - `src/app/index.tsx` — signed-in home
 - `src/app/explore.tsx` — template placeholder
-- `src/features/landing/` — public landing page, sign-in sheet, sections and demos
+- `src/features/landing/` — signed-out tour, slide content, sign-in sheet and demo widgets
 - `src/lib/responsive.ts` — breakpoints, gutters and fluid type helpers
 - `src/lib/api/` — base URL and response types
 - `src/lib/auth/` — session storage, refresh, React context
 - `src/lib/query/` — TanStack Query provider
 - `src/constants/kue-theme.ts` — color, font and spacing tokens
 
-The landing page is responsive from compact phones (under 390dp) through
-foldables and tablets. It reads as a single native app column capped at 620dp,
-with full-bleed horizontal carousels, and reacts to `useWindowDimensions` so
-rotation and split-screen resizing reflow the layout. To exercise the
-breakpoints on an emulator:
+The tour is portrait-first and sized for phones. Each slide caps its content at
+560dp and keeps the footer above the gesture bar using safe-area insets. The
+pager is a horizontal `FlatList` with `pagingEnabled`, so a swipe moves exactly
+one slide at a time; the centered dots are tappable shortcuts, and the header
+"Skip" jumps to the final sign-in slide. To exercise smaller widths on an
+emulator:
 
 ```fish
 adb shell wm size 720x1600

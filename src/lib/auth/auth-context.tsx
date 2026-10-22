@@ -9,6 +9,7 @@ import {
 
 import type { AuthUser } from "@/lib/api/types";
 import {
+  register as registerRequest,
   restoreSession,
   signIn as signInRequest,
   signOut as signOutRequest,
@@ -18,6 +19,7 @@ type AuthContextValue = {
   user: AuthUser | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<AuthUser>;
+  register: (username: string, email: string, password: string) => Promise<AuthUser>;
   signOut: () => Promise<void>;
 };
 
@@ -52,13 +54,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return nextUser;
   }, []);
 
+  const register = useCallback(
+    async (username: string, email: string, password: string) => {
+      const nextUser = await registerRequest({ username, email, password });
+      setUser(nextUser);
+      return nextUser;
+    },
+    [],
+  );
+
   const signOut = useCallback(async () => {
     await signOutRequest();
     setUser(null);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signIn, register, signOut }}>
       {children}
     </AuthContext.Provider>
   );

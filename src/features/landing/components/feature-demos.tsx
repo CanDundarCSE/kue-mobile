@@ -1,4 +1,3 @@
-import * as Haptics from "expo-haptics";
 import { Minus, Plus } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
@@ -12,6 +11,7 @@ import {
   TIME_SPENT,
   type MediaType,
 } from "@/features/landing/data";
+import { selectionHaptic } from "@/lib/haptics";
 
 function DemoLabel({ children }: { children: string }) {
   return <Text style={styles.demoLabel}>{children}</Text>;
@@ -132,7 +132,7 @@ export function VagabondDemo() {
   const finished = current >= TOTAL;
 
   const bump = (delta: number) => {
-    void Haptics.selectionAsync();
+    selectionHaptic();
     setCurrent((value) => Math.max(0, Math.min(TOTAL, value + delta)));
   };
 

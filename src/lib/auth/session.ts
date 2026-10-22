@@ -105,6 +105,44 @@ export async function signIn(email: string, password: string): Promise<AuthUser>
 }
 
 /**
+ * Must stay in sync with `LegalVersion.Current` on the API and LEGAL_VERSION
+ * in the web app. The API rejects a stale consent version.
+ */
+const LEGAL_VERSION = "2026-10-19";
+
+export async function register(input: {
+  username: string;
+  email: string;
+  password: string;
+}): Promise<AuthUser> {
+  const response = await fetch(`${API_V1_URL}/auth/register`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify({
+      username: input.username.trim(),
+      email: input.email.trim(),
+      password: input.password,
+      isTermsAccepted: true,
+      termsVersion: LEGAL_VERSION,
+    }),
+    signal: timeoutSignal(45_000),
+  }).catch(() => null);
+
+  if (!response) {
+    throw new ApiError("Couldn't reach the Kue API. Check your connection.", 0, null);
+  }
+
+  const body = await parseBody(response);
+  if (!response.ok) {
+    throw errorFrom(response, body, "Could not create your account.");
+  }
+
+  const auth = body as AuthResponse;
+  await persistSession(auth);
+  return auth.user;
+}
+
+/**
  * Rotates the refresh token and returns the restored user. Single-flight so
  * a burst of 401s from parallel screens only triggers one rotation.
  */

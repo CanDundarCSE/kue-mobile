@@ -1,7 +1,11 @@
 const RAW_BASE_URL =
   process.env.EXPO_PUBLIC_KUE_API_URL ?? "https://kue-backend-e61h.onrender.com";
 
-const RAW_WEB_URL = process.env.EXPO_PUBLIC_KUE_WEB_URL ?? "";
+// Registration and the legal documents live on the web app. Fall back to the
+// deployed origin so those links work in a fresh checkout where the optional
+// env var has not been set yet; an explicit value still wins.
+const RAW_WEB_URL =
+  process.env.EXPO_PUBLIC_KUE_WEB_URL?.trim() || "https://kue-murex.vercel.app";
 
 export const API_BASE_URL = RAW_BASE_URL.replace(/\/+$/, "");
 

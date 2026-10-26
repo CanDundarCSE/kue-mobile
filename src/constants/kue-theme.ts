@@ -47,6 +47,16 @@ export const KueFonts = {
   mono: "FragmentMono_400Regular",
 } as const;
 
+/**
+ * Ceilings for the system font scale. Text inside fixed-height controls
+ * (buttons, pills, inputs, poster cards) is capped so labels never clip;
+ * body copy and the legal documents scale freely because they can reflow.
+ */
+export const KueTextScale = {
+  control: 1.25,
+  compact: 1.15,
+} as const;
+
 export const KueShadow = {
   color: "#000000",
   offset: { width: 0, height: 18 },

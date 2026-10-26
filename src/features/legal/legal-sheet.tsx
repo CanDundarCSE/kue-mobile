@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { KueColors, KueFonts } from "@/constants/kue-theme";
+import { KueColors, KueFonts, KueTextScale } from "@/constants/kue-theme";
 import {
   LEGAL_DOCUMENTS,
   type LegalDocumentKey,
@@ -112,7 +112,11 @@ function LegalSectionView({ section }: { section: LegalSection }) {
               style={[styles.tableCard, rowIndex < section.table!.rows.length - 1 && styles.tableCardLine]}>
               {row.map((cell, cellIndex) => (
                 <View key={cellIndex} style={styles.tableCardRow}>
-                  <Text style={styles.tableCardLabel}>{section.table!.headers[cellIndex] ?? ""}</Text>
+                  <Text
+                    maxFontSizeMultiplier={KueTextScale.compact}
+                    style={styles.tableCardLabel}>
+                    {section.table!.headers[cellIndex] ?? ""}
+                  </Text>
                   <Text style={styles.tableCardValue}>{cell}</Text>
                 </View>
               ))}

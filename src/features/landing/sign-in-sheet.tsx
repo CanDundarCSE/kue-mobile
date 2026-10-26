@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { KueColors } from "@/constants/kue-theme";
+import { KueColors, KueTextScale } from "@/constants/kue-theme";
 import { LandingButton } from "@/features/landing/components/landing-button";
 import { useAuth } from "@/lib/auth/auth-context";
 
@@ -97,12 +97,15 @@ export function SignInSheet({
             contentContainerStyle={styles.form}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}>
-            <Text style={styles.label}>Email</Text>
+            <Text maxFontSizeMultiplier={KueTextScale.control} style={styles.label}>
+              Email
+            </Text>
             <TextInput
               value={email}
               onChangeText={setEmail}
               placeholder="you@example.com"
               placeholderTextColor={KueColors.ink3}
+              maxFontSizeMultiplier={KueTextScale.control}
               autoCapitalize="none"
               autoComplete="email"
               keyboardType="email-address"
@@ -112,7 +115,9 @@ export function SignInSheet({
               style={styles.input}
             />
 
-            <Text style={styles.label}>Password</Text>
+            <Text maxFontSizeMultiplier={KueTextScale.control} style={styles.label}>
+              Password
+            </Text>
             <View style={styles.passwordRow}>
               <TextInput
                 ref={passwordRef}
@@ -120,6 +125,7 @@ export function SignInSheet({
                 onChangeText={setPassword}
                 placeholder="••••••••"
                 placeholderTextColor={KueColors.ink3}
+                maxFontSizeMultiplier={KueTextScale.control}
                 secureTextEntry={!passwordVisible}
                 autoComplete="current-password"
                 returnKeyType="go"
@@ -140,7 +146,11 @@ export function SignInSheet({
               </Pressable>
             </View>
 
-            {error ? <Text style={styles.error}>{error}</Text> : null}
+            {error ? (
+              <Text maxFontSizeMultiplier={KueTextScale.control} style={styles.error}>
+                {error}
+              </Text>
+            ) : null}
 
             <View style={styles.submit}>
               <LandingButton

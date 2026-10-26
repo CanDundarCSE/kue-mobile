@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { KueColors } from "@/constants/kue-theme";
+import { KueColors, KueTextScale } from "@/constants/kue-theme";
 import { LandingButton } from "@/features/landing/components/landing-button";
 import { useAuth } from "@/lib/auth/auth-context";
 
@@ -111,12 +111,15 @@ export function RegisterSheet({
             contentContainerStyle={styles.form}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}>
-            <Text style={styles.label}>Username</Text>
+            <Text maxFontSizeMultiplier={KueTextScale.control} style={styles.label}>
+              Username
+            </Text>
             <TextInput
               value={username}
               onChangeText={setUsername}
               placeholder="yourname"
               placeholderTextColor={KueColors.ink3}
+              maxFontSizeMultiplier={KueTextScale.control}
               autoCapitalize="none"
               autoComplete="username-new"
               returnKeyType="next"
@@ -124,13 +127,16 @@ export function RegisterSheet({
               style={styles.input}
             />
 
-            <Text style={styles.label}>Email</Text>
+            <Text maxFontSizeMultiplier={KueTextScale.control} style={styles.label}>
+              Email
+            </Text>
             <TextInput
               ref={emailRef}
               value={email}
               onChangeText={setEmail}
               placeholder="you@example.com"
               placeholderTextColor={KueColors.ink3}
+              maxFontSizeMultiplier={KueTextScale.control}
               autoCapitalize="none"
               autoComplete="email"
               keyboardType="email-address"
@@ -140,7 +146,9 @@ export function RegisterSheet({
               style={styles.input}
             />
 
-            <Text style={styles.label}>Password</Text>
+            <Text maxFontSizeMultiplier={KueTextScale.control} style={styles.label}>
+              Password
+            </Text>
             <View style={styles.passwordRow}>
               <TextInput
                 ref={passwordRef}
@@ -148,6 +156,7 @@ export function RegisterSheet({
                 onChangeText={setPassword}
                 placeholder="••••••••"
                 placeholderTextColor={KueColors.ink3}
+                maxFontSizeMultiplier={KueTextScale.control}
                 secureTextEntry={!passwordVisible}
                 autoComplete="new-password"
                 returnKeyType="go"
@@ -167,7 +176,7 @@ export function RegisterSheet({
                 )}
               </Pressable>
             </View>
-            <Text style={styles.requirements}>
+            <Text maxFontSizeMultiplier={KueTextScale.control} style={styles.requirements}>
               8+ characters, one uppercase letter and one symbol.
             </Text>
 
@@ -180,7 +189,9 @@ export function RegisterSheet({
               <View style={[styles.checkbox, accepted && styles.checkboxOn]}>
                 {accepted ? <Check size={12} color={KueColors.background} strokeWidth={3} /> : null}
               </View>
-              <Text style={styles.termsText}>
+              <Text
+                maxFontSizeMultiplier={KueTextScale.control}
+                style={styles.termsText}>
                 I accept the Privacy Policy and Terms of Service.
               </Text>
             </Pressable>

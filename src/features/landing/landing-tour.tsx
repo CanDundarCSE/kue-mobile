@@ -125,7 +125,7 @@ export function LandingTour({
                   if (!active) selectionHaptic();
                   goTo(slide);
                 }}
-                hitSlop={10}
+                hitSlop={16}
                 accessibilityRole="button"
                 accessibilityLabel={`Go to step ${slide + 1} of ${SLIDES.length}`}
                 accessibilityState={{ selected: active }}>
@@ -153,7 +153,8 @@ const styles = StyleSheet.create({
   slideContent: {
     flexGrow: 1,
     justifyContent: "center",
-    paddingVertical: 8,
+    paddingTop: 8,
+    paddingBottom: 20,
   },
   footer: {
     alignItems: "center",

@@ -2,7 +2,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Check, Minus, Plus } from "lucide-react-native";
 import { StyleSheet, Text, View } from "react-native";
 
-import { KueColors, KueFonts } from "@/constants/kue-theme";
+import { KueColors, KueFonts, KueTextScale } from "@/constants/kue-theme";
 import { MediaAvatarCard } from "@/features/landing/components/media-avatar-card";
 import { StatusPill } from "@/features/landing/components/status-pill";
 import {
@@ -45,13 +45,19 @@ function PreviewRow({ row }: { row: LandingRow }) {
       />
 
       <View style={styles.rowBody}>
-        <Text style={styles.rowTitle} numberOfLines={1}>
+        <Text
+          maxFontSizeMultiplier={KueTextScale.control}
+          style={styles.rowTitle}
+          numberOfLines={1}>
           {row.title}
         </Text>
 
         <View style={styles.metaRow}>
           <View style={[styles.metaDot, { backgroundColor: meta.color }]} />
-          <Text style={styles.metaText} numberOfLines={1}>
+          <Text
+            maxFontSizeMultiplier={KueTextScale.control}
+            style={styles.metaText}
+            numberOfLines={1}>
             {meta.label} · {row.year}
           </Text>
           <StatusPill status={row.status} compact />
@@ -70,7 +76,7 @@ function PreviewRow({ row }: { row: LandingRow }) {
                 ]}
               />
             </View>
-            <Text style={styles.progressText}>
+            <Text maxFontSizeMultiplier={KueTextScale.compact} style={styles.progressText}>
               {row.current}/{row.total} {row.unit}
             </Text>
           </View>
@@ -123,10 +129,14 @@ export function LibraryPreview() {
 
             return (
               <View key={filter.type} style={[styles.chip, active && styles.chipActive]}>
-                <Text style={[styles.chipLabel, active && styles.chipLabelActive]}>
+                <Text
+                  maxFontSizeMultiplier={KueTextScale.compact}
+                  style={[styles.chipLabel, active && styles.chipLabelActive]}>
                   {filter.label}
                 </Text>
-                <Text style={[styles.chipCount, active && styles.chipCountActive]}>
+                <Text
+                  maxFontSizeMultiplier={KueTextScale.compact}
+                  style={[styles.chipCount, active && styles.chipCountActive]}>
                   {countFor(filter.type)}
                 </Text>
               </View>

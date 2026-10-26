@@ -1,6 +1,6 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text } from "react-native";
 
-import { KueColors } from "@/constants/kue-theme";
+import { KueColors, KueTextScale } from "@/constants/kue-theme";
 
 export type LandingButtonVariant = "primary" | "secondary" | "ghost";
 
@@ -47,7 +47,11 @@ export function LandingButton({
           color={variant === "primary" ? KueColors.background : KueColors.foreground}
         />
       ) : (
-        <Text style={[styles.label, sizeLabel[size], labelStyles[variant]]}>{label}</Text>
+        <Text
+          maxFontSizeMultiplier={KueTextScale.control}
+          style={[styles.label, sizeLabel[size], labelStyles[variant]]}>
+          {label}
+        </Text>
       )}
     </Pressable>
   );

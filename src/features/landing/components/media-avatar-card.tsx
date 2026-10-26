@@ -2,7 +2,7 @@ import { Image } from "expo-image";
 import { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-import { KueColors } from "@/constants/kue-theme";
+import { KueColors, KueTextScale } from "@/constants/kue-theme";
 import { MEDIA_TYPE_META, type MediaType } from "@/features/landing/data";
 
 const SIZES = {
@@ -59,11 +59,16 @@ export function MediaAvatarCard({
         />
       ) : (
         <View style={styles.fallback}>
-          <Text style={styles.initials} numberOfLines={1}>
+          <Text
+            maxFontSizeMultiplier={KueTextScale.compact}
+            style={styles.initials}
+            numberOfLines={1}>
             {getInitials(title)}
           </Text>
           {size !== "sm" && year !== undefined ? (
-            <Text style={styles.year}>{year}</Text>
+            <Text maxFontSizeMultiplier={KueTextScale.compact} style={styles.year}>
+              {year}
+            </Text>
           ) : null}
         </View>
       )}

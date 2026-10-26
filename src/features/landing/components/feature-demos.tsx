@@ -2,7 +2,7 @@ import { Minus, Plus } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { KueColors } from "@/constants/kue-theme";
+import { KueColors, KueTextScale } from "@/constants/kue-theme";
 import { MediaAvatarCard } from "@/features/landing/components/media-avatar-card";
 import {
   COVERS,
@@ -60,7 +60,9 @@ export function FriendDemo() {
       {events.map((event, index) => (
         <View key={event.name} style={[styles.friendRow, index > 0 && styles.divider]}>
           <View style={styles.friendAvatar}>
-            <Text style={styles.friendInitials}>{event.initials}</Text>
+            <Text maxFontSizeMultiplier={KueTextScale.compact} style={styles.friendInitials}>
+              {event.initials}
+            </Text>
           </View>
           <Text style={styles.friendText}>
             <Text style={styles.friendName}>{event.name}</Text> {event.rest}

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { KueColors, KueFonts, KueSpacing } from '@/constants/kue-theme';
+import { KueColors, KueFonts, KueSpacing, KueTextScale } from '@/constants/kue-theme';
 import { useAuth } from '@/lib/auth/auth-context';
 import { useResponsive } from '@/lib/responsive';
 
@@ -52,7 +52,9 @@ export default function HomeScreen() {
             {busy ? (
               <ActivityIndicator color={KueColors.foreground} />
             ) : (
-              <Text style={styles.secondaryButtonText}>Sign out</Text>
+              <Text maxFontSizeMultiplier={KueTextScale.control} style={styles.secondaryButtonText}>
+                Sign out
+              </Text>
             )}
           </Pressable>
 

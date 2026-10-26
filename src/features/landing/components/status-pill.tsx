@@ -2,7 +2,7 @@ import { BookOpen, Check, Eye, EyeOff, Gamepad2, Pause, Play } from "lucide-reac
 import type { ComponentType } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-import { KueColors } from "@/constants/kue-theme";
+import { KueColors, KueTextScale } from "@/constants/kue-theme";
 import type { LandingStatus } from "@/features/landing/data";
 
 type IconComponent = ComponentType<{ size?: number; color?: string; strokeWidth?: number }>;
@@ -27,7 +27,9 @@ export function StatusPill({ status, compact = false }: { status: LandingStatus;
     return (
       <View style={styles.dotRow}>
         <View style={[styles.dot, { backgroundColor: meta.color }]} />
-        <Text style={styles.dotLabel}>{meta.label}</Text>
+        <Text maxFontSizeMultiplier={KueTextScale.control} style={styles.dotLabel}>
+          {meta.label}
+        </Text>
       </View>
     );
   }
@@ -39,7 +41,11 @@ export function StatusPill({ status, compact = false }: { status: LandingStatus;
         { borderColor: `${meta.color}55`, backgroundColor: `${meta.color}1f` },
       ]}>
       <meta.Icon size={12} color={meta.color} strokeWidth={2.4} />
-      <Text style={[styles.pillLabel, { color: meta.color }]}>{meta.label}</Text>
+      <Text
+        maxFontSizeMultiplier={KueTextScale.control}
+        style={[styles.pillLabel, { color: meta.color }]}>
+        {meta.label}
+      </Text>
     </View>
   );
 }

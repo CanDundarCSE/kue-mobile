@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { KueColors, KueFonts } from "@/constants/kue-theme";
+import { KueColors, KueFonts, KueTextScale } from "@/constants/kue-theme";
 import { LogoMark } from "@/features/landing/components/logo-mark";
 
 /** Brand bar for the signed-out tour. The right slot is optional (e.g. Skip). */
@@ -13,7 +13,9 @@ export function AppBar({ action }: { action?: { label: string; onPress: () => vo
       <View style={styles.inner}>
         <View style={styles.brand}>
           <LogoMark size={10} />
-          <Text style={styles.brandText}>Kue</Text>
+          <Text maxFontSizeMultiplier={KueTextScale.control} style={styles.brandText}>
+            Kue
+          </Text>
         </View>
 
         {action ? (
@@ -24,7 +26,9 @@ export function AppBar({ action }: { action?: { label: string; onPress: () => vo
             accessibilityLabel={action.label}
             android_ripple={{ color: "rgba(255,255,255,0.08)", borderless: false }}
             style={({ pressed }) => [styles.action, pressed && styles.pressed]}>
-            <Text style={styles.actionText}>{action.label}</Text>
+            <Text maxFontSizeMultiplier={KueTextScale.control} style={styles.actionText}>
+              {action.label}
+            </Text>
           </Pressable>
         ) : null}
       </View>
@@ -59,8 +63,8 @@ const styles = StyleSheet.create({
     letterSpacing: -0.6,
   },
   action: {
-    height: 34,
-    paddingHorizontal: 13,
+    height: 44,
+    paddingHorizontal: 16,
     borderRadius: 999,
     backgroundColor: KueColors.surface3,
     alignItems: "center",
@@ -73,6 +77,6 @@ const styles = StyleSheet.create({
   actionText: {
     color: KueColors.foreground,
     fontFamily: KueFonts.sansSemiBold,
-    fontSize: 12.5,
+    fontSize: 13,
   },
 });

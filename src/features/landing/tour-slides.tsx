@@ -58,7 +58,7 @@ const RECENT = [
   { title: "Vagabond", detail: "Chapter 141", when: "Yesterday" },
 ];
 
-const LEGAL_LINKS: Array<{ label: string; key: LegalDocumentKey }> = [
+const LEGAL_LINKS: { label: string; key: LegalDocumentKey }[] = [
   { label: "Privacy", key: "privacy" },
   { label: "Cookies", key: "cookies" },
   { label: "Terms", key: "terms" },
@@ -596,13 +596,15 @@ const styles = StyleSheet.create({
   },
   legalRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
     justifyContent: "center",
-    gap: 10,
+    gap: 8,
+    maxWidth: "100%",
   },
   legalLink: {
     minHeight: 44,
     justifyContent: "center",
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
     borderRadius: 12,
   },
   legalPressed: {

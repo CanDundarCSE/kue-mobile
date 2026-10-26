@@ -1,56 +1,10 @@
-import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { KueColors, KueFonts, KueSpacing } from '@/constants/kue-theme';
-import { API_HEALTH_URL } from '@/lib/api/config';
 import { useAuth } from '@/lib/auth/auth-context';
 import { useResponsive } from '@/lib/responsive';
-
-async function checkApi(): Promise<string> {
-  const response = await fetch(API_HEALTH_URL, {
-    headers: { Accept: 'application/json' },
-  }).catch(() => null);
-
-  if (!response) throw new Error("Couldn't reach the API.");
-
-  const body = (await response.json().catch(() => null)) as { message?: string } | null;
-  if (!response.ok) throw new Error(body?.message ?? `API returned ${response.status}.`);
-
-  return body?.message ?? 'Connected';
-}
-
-function ApiStatus() {
-  const query = useQuery({
-    queryKey: ['api-health'],
-    queryFn: checkApi,
-    retry: 1,
-  });
-
-  const label = query.isPending
-    ? 'Checking…'
-    : query.isError
-      ? 'Offline'
-      : (query.data ?? 'Connected');
-
-  const color = query.isError ? KueColors.danger : query.isPending ? KueColors.series : KueColors.game;
-
-  return (
-    <View style={styles.statusRow}>
-      <View style={[styles.statusDot, { backgroundColor: color }]} />
-      <Text style={styles.statusLabel}>RENDER API</Text>
-      <Text style={styles.statusValue} numberOfLines={1}>
-        {label}
-      </Text>
-      {query.isError ? (
-        <Pressable onPress={() => query.refetch()} hitSlop={8}>
-          <Text style={styles.retry}>Retry</Text>
-        </Pressable>
-      ) : null}
-    </View>
-  );
-}
 
 export default function HomeScreen() {
   const { user, signOut } = useAuth();
@@ -81,12 +35,10 @@ export default function HomeScreen() {
             You&apos;re signed in. Library, Discover, Lists and Profile are the next screens to build.
           </Text>
 
-          <ApiStatus />
-
           <View style={styles.card}>
             <Text style={styles.kicker}>ACCOUNT</Text>
             <Text style={styles.cardTitle}>{user?.username ?? 'Signed out'}</Text>
-            <Text style={styles.cardBody}>{user?.email ?? '—'}</Text>
+            <Text style={styles.cardBody}>{user?.email ?? 'No email on file'}</Text>
             {user?.kueId ? <Text style={styles.cardMeta}>KUE ID · {user.kueId}</Text> : null}
             {user?.roles?.length ? (
               <Text style={styles.cardMeta}>ROLES · {user.roles.join(', ')}</Text>
@@ -145,40 +97,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 21,
     marginTop: -KueSpacing.sm,
-  },
-  statusRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: KueSpacing.sm,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: KueColors.line,
-    backgroundColor: KueColors.surface2,
-    borderRadius: 12,
-    paddingHorizontal: KueSpacing.lg,
-    paddingVertical: KueSpacing.md,
-  },
-  statusDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-  },
-  statusLabel: {
-    color: KueColors.ink3,
-    fontFamily: KueFonts.mono,
-    fontSize: 10,
-    letterSpacing: 1.4,
-  },
-  statusValue: {
-    color: KueColors.foreground,
-    flex: 1,
-    textAlign: 'right',
-    fontFamily: KueFonts.sans,
-    fontSize: 12,
-  },
-  retry: {
-    color: KueColors.accent,
-    fontFamily: KueFonts.mono,
-    fontSize: 11,
   },
   card: {
     borderWidth: StyleSheet.hairlineWidth,

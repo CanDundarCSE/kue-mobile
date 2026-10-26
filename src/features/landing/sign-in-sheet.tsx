@@ -92,11 +92,6 @@ export function SignInSheet({
             </Pressable>
           </View>
 
-          <Text style={styles.body}>
-            Use the same account as the web app. Your session is stored on this device with an
-            encrypted refresh token.
-          </Text>
-
           <ScrollView
             style={styles.formScroll}
             contentContainerStyle={styles.form}
@@ -157,10 +152,6 @@ export function SignInSheet({
                 disabled={!canSubmit}
               />
             </View>
-
-            <Text style={styles.hint}>
-              Render&apos;s free tier can take up to a minute to wake the API on the first request.
-            </Text>
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
@@ -224,12 +215,6 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: 0.7,
   },
-  body: {
-    color: KueColors.ink2,
-    fontSize: 14,
-    lineHeight: 21,
-    marginTop: 8,
-  },
   formScroll: {
     flexGrow: 0,
     flexShrink: 1,
@@ -278,11 +263,5 @@ const styles = StyleSheet.create({
   },
   submit: {
     marginTop: 14,
-  },
-  hint: {
-    color: KueColors.ink3,
-    fontSize: 11.5,
-    lineHeight: 17,
-    marginTop: 12,
   },
 });

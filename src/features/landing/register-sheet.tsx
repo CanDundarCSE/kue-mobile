@@ -197,10 +197,6 @@ export function RegisterSheet({
                 disabled={!canSubmit}
               />
             </View>
-
-            <Text style={styles.hint}>
-              Render&apos;s free tier can take up to a minute to wake the API on the first request.
-            </Text>
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
@@ -330,10 +326,4 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   submit: { marginTop: 14 },
-  hint: {
-    color: KueColors.ink3,
-    fontSize: 11.5,
-    lineHeight: 17,
-    marginTop: 12,
-  },
 });

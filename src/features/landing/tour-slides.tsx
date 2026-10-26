@@ -104,7 +104,7 @@ function WelcomeSlide({ onStartTour }: { onStartTour: () => void }) {
   return (
     <SlideFrame
       title="One shelf for your whole media life"
-      body="Films, series, games, anime and manga tracked in one place — one scale, one set of numbers. Start the short tour, or skip straight to sign in.">
+      body="Films, series, games, anime and manga tracked in one place. One scale, one set of numbers. Start the short tour, or skip straight to sign in.">
       <LibraryPreview />
       <LandingButton label="Start the tour" onPress={onStartTour} size="lg" fullWidth />
     </SlideFrame>
@@ -114,7 +114,7 @@ function WelcomeSlide({ onStartTour }: { onStartTour: () => void }) {
 function FormatsSlide() {
   return (
     <SlideFrame
-      eyebrow="01 — ONE LIBRARY"
+      eyebrow="01 · ONE LIBRARY"
       title="Five formats, one shelf"
       body="Your film diary, series queue, game backlog, anime list and manga stack finally live together. Search once, add anywhere.">
       <View style={styles.formatGrid}>
@@ -161,7 +161,7 @@ function FormatsSlide() {
 function ProgressSlide() {
   return (
     <SlideFrame
-      eyebrow="02 — PROGRESS"
+      eyebrow="02 · PROGRESS"
       title="Progress that adds up"
       body="Update episodes, chapters, hours or films. The status follows the format, and every number feeds the same totals.">
       <View style={styles.demoCard}>
@@ -188,9 +188,9 @@ function ProgressSlide() {
 function FriendsSlide() {
   return (
     <SlideFrame
-      eyebrow="03 — FRIENDS"
+      eyebrow="03 · FRIENDS"
       title="Your people, your taste"
-      body="Follow friends, share lists and see what they are into. No comment sections, no hot takes — just shelves you can trust.">
+      body="Follow friends, share lists and see what they are into. No comment sections, no hot takes. Just shelves you can trust.">
       <View style={styles.demoCard}>
         <FriendDemo />
       </View>
@@ -213,9 +213,9 @@ function FriendsSlide() {
 function NumbersSlide() {
   return (
     <SlideFrame
-      eyebrow="04 — NUMBERS"
+      eyebrow="04 · NUMBERS"
       title="The honest numbers"
-      body="Time, genres, streaks and a live activity heatmap — every format counted in the same honest totals, never split across apps.">
+      body="Time, genres, streaks and a live activity heatmap. Every format counted in the same honest totals, never split across apps.">
       <View style={styles.demoCard}>
         <View style={styles.heatHeader}>
           <Text style={styles.demoLabel}>Last 18 weeks</Text>

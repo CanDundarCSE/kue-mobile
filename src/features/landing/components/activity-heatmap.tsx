@@ -121,7 +121,7 @@ export function ActivityHeatmap({
     <View
       onLayout={(event) => setMeasuredWidth(event.nativeEvent.layout.width)}
       accessibilityRole="image"
-      accessibilityLabel={`${activeDays} active days in the last ${resolvedWeeks} weeks — ${addedTotal} added, ${completedTotal} completed`}
+      accessibilityLabel={`${activeDays} active days in the last ${resolvedWeeks} weeks, ${addedTotal} added, ${completedTotal} completed`}
       style={styles.row}>
       {weeksData.map((week, weekIndex) => (
         <View key={weekIndex} style={styles.column}>

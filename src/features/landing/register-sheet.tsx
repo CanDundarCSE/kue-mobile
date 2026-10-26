@@ -3,7 +3,6 @@ import { useRef, useState, type ComponentRef } from "react";
 import {
   KeyboardAvoidingView,
   Modal,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -77,7 +76,7 @@ export function RegisterSheet({
       onRequestClose={close}>
       <KeyboardAvoidingView
         style={styles.overlay}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}>
+        behavior="padding">
         <Pressable
           style={styles.backdrop}
           onPress={close}

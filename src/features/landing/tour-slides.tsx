@@ -1,4 +1,3 @@
-import * as WebBrowser from "expo-web-browser";
 import {
   BarChart3,
   BookOpen,
@@ -12,7 +11,8 @@ import {
   Users,
 } from "lucide-react-native";
 import type { ComponentType, ReactNode } from "react";
-import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { KueColors, KueFonts } from "@/constants/kue-theme";
 import { ActivityHeatmap } from "@/features/landing/components/activity-heatmap";
@@ -27,7 +27,8 @@ import {
   MEDIA_TYPE_META,
   type MediaType,
 } from "@/features/landing/data";
-import { WEB_BASE_URL } from "@/lib/api/config";
+import { LegalSheet } from "@/features/legal/legal-sheet";
+import type { LegalDocumentKey } from "@/features/legal/legal-content";
 
 type IconComponent = ComponentType<{ size?: number; color?: string; strokeWidth?: number }>;
 
@@ -57,10 +58,10 @@ const RECENT = [
   { title: "Vagabond", detail: "Chapter 141", when: "Yesterday" },
 ];
 
-const LEGAL_LINKS = [
-  { label: "Privacy", path: "/privacy-policy" },
-  { label: "Cookies", path: "/cookies" },
-  { label: "Terms", path: "/terms-of-service" },
+const LEGAL_LINKS: Array<{ label: string; key: LegalDocumentKey }> = [
+  { label: "Privacy", key: "privacy" },
+  { label: "Cookies", key: "cookies" },
+  { label: "Terms", key: "terms" },
 ];
 
 export const TOUR_SLIDE_KEYS = [
@@ -239,19 +240,8 @@ function NumbersSlide() {
   );
 }
 
-function openWebPath(path: string) {
-  if (!WEB_BASE_URL) {
-    Alert.alert(
-      "Open on the web",
-      "This page lives on the Kue web app. Set EXPO_PUBLIC_KUE_WEB_URL to open it from here.",
-    );
-    return;
-  }
-
-  void WebBrowser.openBrowserAsync(`${WEB_BASE_URL}${path}`);
-}
-
 function ReadySlide({ onSignIn, onRegister }: { onSignIn: () => void; onRegister: () => void }) {
+  const [legalDoc, setLegalDoc] = useState<LegalDocumentKey | null>(null);
   return (
     <SlideFrame
       eyebrow="READY WHEN YOU ARE"
@@ -288,16 +278,20 @@ function ReadySlide({ onSignIn, onRegister }: { onSignIn: () => void; onRegister
           {LEGAL_LINKS.map((link) => (
             <Pressable
               key={link.label}
-              onPress={() => openWebPath(link.path)}
-              hitSlop={8}
-              accessibilityRole="link">
-              <Text style={styles.legalLink}>{link.label}</Text>
+              onPress={() => setLegalDoc(link.key)}
+              style={({ pressed }) => [styles.legalLink, pressed && styles.legalPressed]}
+              hitSlop={4}
+              accessibilityRole="button"
+              accessibilityLabel={`Open ${link.label} policy`}>
+              <Text style={styles.legalLabelText}>{link.label}</Text>
             </Pressable>
           ))}
         </View>
 
         <Text style={styles.copyright}>© 2026 Kue · Metadata by TMDB, AniList &amp; IGDB</Text>
       </View>
+
+      <LegalSheet documentKey={legalDoc} onClose={() => setLegalDoc(null)} />
     </SlideFrame>
   );
 }
@@ -603,13 +597,22 @@ const styles = StyleSheet.create({
   legalRow: {
     flexDirection: "row",
     justifyContent: "center",
-    gap: 18,
+    gap: 10,
   },
   legalLink: {
+    minHeight: 44,
+    justifyContent: "center",
+    paddingHorizontal: 14,
+    borderRadius: 12,
+  },
+  legalPressed: {
+    backgroundColor: KueColors.surface3,
+  },
+  legalLabelText: {
     color: KueColors.ink2,
     fontFamily: KueFonts.mono,
-    fontSize: 10,
-    letterSpacing: 0.6,
+    fontSize: 12.5,
+    letterSpacing: 0.8,
     textTransform: "uppercase",
   },
   copyright: {

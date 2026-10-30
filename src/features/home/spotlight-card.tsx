@@ -13,6 +13,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 
+import { Skeleton } from '@/components/skeleton';
 import { KueColors, KueFonts, KueSpacing } from '@/constants/kue-theme';
 import {
   addToLibrary,
@@ -94,8 +95,15 @@ export function SpotlightCard() {
       {spotlightQuery.isError ? (
         <ErrorLine onRetry={() => void spotlightQuery.refetch()} />
       ) : spotlightQuery.isPending ? (
-        <View style={styles.loading}>
-          <ActivityIndicator color={KueColors.ink3} />
+        <View style={styles.skeletonBody}>
+          <View style={styles.heading}>
+            <Skeleton width={64} height={8} radius={4} />
+            <Skeleton width="76%" height={18} />
+          </View>
+          <View style={[styles.rail, styles.skeletonRow]}>
+            <Skeleton width={itemWidth} height={itemWidth * (54 / 42)} radius={12} />
+            <Skeleton width={itemWidth} height={itemWidth * (54 / 42)} radius={12} />
+          </View>
         </View>
       ) : (
         <>
@@ -233,6 +241,12 @@ const styles = StyleSheet.create({
   loading: {
     alignItems: 'center',
     paddingVertical: KueSpacing.xl,
+  },
+  skeletonBody: {
+    gap: KueSpacing.md,
+  },
+  skeletonRow: {
+    flexDirection: 'row',
   },
   empty: {
     paddingHorizontal: KueSpacing.xl,

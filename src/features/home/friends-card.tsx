@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
+import { Skeleton } from '@/components/skeleton';
 import { KueColors, KueFonts, KueSpacing } from '@/constants/kue-theme';
 import { fetchFriendActivity } from '@/lib/api/home';
 
@@ -20,8 +21,16 @@ export function FriendsCard() {
       {friendsQuery.isError ? (
         <ErrorLine onRetry={() => void friendsQuery.refetch()} />
       ) : friendsQuery.isPending ? (
-        <View style={styles.loading}>
-          <ActivityIndicator color={KueColors.ink3} />
+        <View>
+          {[0, 1, 2].map((row) => (
+            <View key={row} style={styles.row}>
+              <Skeleton width={32} height={32} radius={16} />
+              <View style={styles.skeletonText}>
+                <Skeleton width="70%" height={10} />
+                <Skeleton width="40%" height={8} radius={4} />
+              </View>
+            </View>
+          ))}
         </View>
       ) : friendsQuery.data.length === 0 ? (
         <Text style={styles.empty}>No friend activity yet.</Text>
@@ -53,9 +62,9 @@ const styles = StyleSheet.create({
     backgroundColor: KueColors.surface2,
     padding: KueSpacing.xl,
   },
-  loading: {
-    alignItems: 'center',
-    paddingVertical: KueSpacing.md,
+  skeletonText: {
+    flex: 1,
+    gap: 6,
   },
   empty: {
     color: KueColors.ink2,

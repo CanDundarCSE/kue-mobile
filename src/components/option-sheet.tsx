@@ -1,6 +1,16 @@
 import { Check } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { Animated, Easing, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  Animated,
+  Easing,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { KueColors, KueFonts, KueSpacing } from '@/constants/kue-theme';
@@ -30,6 +40,7 @@ export function OptionSheet<T extends string>({
   onClose: () => void;
 }) {
   const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
   const [sheetHeight, setSheetHeight] = useState(0);
   const [progress] = useState(() => new Animated.Value(0));
 
@@ -70,7 +81,11 @@ export function OptionSheet<T extends string>({
           <View style={styles.grabber} />
           <Text style={styles.title}>{title}</Text>
 
-          {options.map((option) => {
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            style={{ maxHeight: windowHeight * 0.55 }}
+            contentContainerStyle={styles.options}>
+            {options.map((option) => {
             const active = option.value === value;
             return (
               <Pressable
@@ -86,8 +101,9 @@ export function OptionSheet<T extends string>({
                 {option.meta ? <Text style={styles.meta}>{option.meta}</Text> : null}
                 {active ? <Check color={KueColors.accent} size={16} strokeWidth={2.4} /> : null}
               </Pressable>
-            );
-          })}
+              );
+            })}
+          </ScrollView>
         </Animated.View>
       </View>
     </Modal>
@@ -124,6 +140,9 @@ const styles = StyleSheet.create({
     letterSpacing: 1.8,
     textTransform: 'uppercase',
     marginBottom: KueSpacing.xs,
+  },
+  options: {
+    paddingBottom: KueSpacing.xs,
   },
   row: {
     flexDirection: 'row',

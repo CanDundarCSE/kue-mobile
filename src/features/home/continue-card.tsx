@@ -14,6 +14,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 
+import { Skeleton } from "@/components/skeleton";
 import { KueColors, KueFonts, KueSpacing } from "@/constants/kue-theme";
 import { lightHaptic } from "@/lib/haptics";
 import {
@@ -117,8 +118,14 @@ export function ContinueCard({ gutter }: { gutter: number }) {
     return (
       <View style={styles.section}>
         <SectionLabel>Continue</SectionLabel>
-        <View style={[styles.card, styles.skeleton, { width: cardWidth, marginLeft: gutter }]}>
-          <ActivityIndicator color={KueColors.ink3} />
+        <View style={[styles.card, styles.skeletonCard, { width: cardWidth, marginLeft: gutter }]}>
+          <Skeleton width={46} height={64} radius={8} />
+          <View style={styles.skeletonBody}>
+            <Skeleton width={64} height={8} radius={4} />
+            <Skeleton width="72%" height={16} />
+            <Skeleton width="88%" height={4} radius={2} />
+            <Skeleton width={110} height={8} radius={4} />
+          </View>
         </View>
       </View>
     );
@@ -343,11 +350,15 @@ const styles = StyleSheet.create({
     backgroundColor: KueColors.surface2,
     padding: KueSpacing.lg,
   },
-  skeleton: {
-    height: 132,
+  skeletonCard: {
+    minHeight: 132,
     marginTop: KueSpacing.xs,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+  },
+  skeletonBody: {
+    flex: 1,
+    gap: KueSpacing.sm,
+    justifyContent: 'center',
   },
   empty: {
     borderRadius: 16,

@@ -1,5 +1,4 @@
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronDown } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -13,6 +12,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { OptionSheet, type SheetOption } from '@/components/option-sheet';
+import { PickerChip } from '@/components/picker-chip';
+import { Skeleton } from '@/components/skeleton';
 import { KueColors, KueFonts, KueSpacing } from '@/constants/kue-theme';
 import { EditSheet } from '@/features/library/edit-sheet';
 import { LibraryRow } from '@/features/library/library-row';
@@ -175,16 +176,19 @@ export default function LibraryScreen() {
           label="Type"
           value={TABS.find((tab) => tab.id === type)?.label ?? 'All types'}
           onPress={() => setPicker('type')}
+          style={styles.chipFlex}
         />
         <PickerChip
           label="Status"
           value={STATUS_PILLS.find((pill) => pill.id === status)?.chip ?? 'All'}
           onPress={() => setPicker('status')}
+          style={styles.chipFlex}
         />
         <PickerChip
           label="Sort"
           value={SORT_OPTIONS.find((option) => option.id === sort)?.chip ?? 'Recent'}
           onPress={() => setPicker('sort')}
+          style={styles.chipFlex}
         />
       </View>
     </View>
@@ -277,32 +281,6 @@ export default function LibraryScreen() {
   );
 }
 
-function PickerChip({
-  label,
-  value,
-  onPress,
-}: {
-  label: string;
-  value: string;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`${label}: ${value}`}
-      onPress={onPress}
-      style={({ pressed }) => [styles.chip, pressed && styles.pressed]}>
-      <Text style={styles.chipLabel}>{label}</Text>
-      <View style={styles.chipValueRow}>
-        <Text style={styles.chipValue} numberOfLines={1}>
-          {value}
-        </Text>
-        <ChevronDown color={KueColors.ink3} size={12} strokeWidth={2} />
-      </View>
-    </Pressable>
-  );
-}
-
 function getFormatCount(stats?: StatsOverview) {
   if (!stats) return 0;
   const counts = [stats.movie, stats.series, stats.game, stats.anime, stats.manga];
@@ -334,8 +312,17 @@ function ListState({
 }) {
   if (pending) {
     return (
-      <View style={styles.state}>
-        <ActivityIndicator color={KueColors.ink3} />
+      <View style={styles.skeletonList}>
+        {[0, 1, 2, 3].map((row) => (
+          <View key={row} style={styles.skeletonCard}>
+            <Skeleton width={48} height={64} radius={8} />
+            <View style={styles.skeletonBody}>
+              <Skeleton width="62%" height={14} />
+              <Skeleton width="32%" height={10} radius={4} />
+              <Skeleton width="48%" height={8} radius={4} />
+            </View>
+          </View>
+        ))}
       </View>
     );
   }
@@ -418,35 +405,8 @@ const styles = StyleSheet.create({
     gap: KueSpacing.sm,
     marginTop: KueSpacing.sm,
   },
-  chip: {
+  chipFlex: {
     flex: 1,
-    gap: 3,
-    minHeight: 48,
-    justifyContent: 'center',
-    paddingHorizontal: KueSpacing.md,
-    paddingVertical: KueSpacing.sm,
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: KueColors.line2,
-    backgroundColor: KueColors.surface2,
-  },
-  chipLabel: {
-    color: KueColors.ink3,
-    fontFamily: KueFonts.mono,
-    fontSize: 8,
-    letterSpacing: 1.4,
-    textTransform: 'uppercase',
-  },
-  chipValueRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  chipValue: {
-    flexShrink: 1,
-    color: KueColors.foreground,
-    fontFamily: KueFonts.sansMedium,
-    fontSize: 12,
   },
   pressed: {
     opacity: 0.7,
@@ -462,6 +422,23 @@ const styles = StyleSheet.create({
     gap: KueSpacing.sm,
     paddingVertical: KueSpacing.xxl,
     paddingHorizontal: KueSpacing.lg,
+  },
+  skeletonList: {
+    gap: 10,
+  },
+  skeletonCard: {
+    flexDirection: 'row',
+    gap: KueSpacing.md,
+    borderRadius: 14,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: KueColors.line,
+    backgroundColor: KueColors.surface2,
+    padding: KueSpacing.md,
+  },
+  skeletonBody: {
+    flex: 1,
+    gap: KueSpacing.sm,
+    justifyContent: 'center',
   },
   stateTitle: {
     color: KueColors.ink2,

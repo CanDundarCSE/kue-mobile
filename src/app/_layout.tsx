@@ -7,13 +7,15 @@ import {
   Montserrat_700Bold,
 } from '@expo-google-fonts/montserrat';
 import { useFonts } from 'expo-font';
-import { DarkTheme, ThemeProvider } from 'expo-router';
+import { DarkTheme, Slot, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import { StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import AppTabs from '@/components/app-tabs';
+import { BottomNav } from '@/components/bottom-nav';
 import { BootScreen } from '@/components/boot-screen';
+import { KueColors } from '@/constants/kue-theme';
 import { LandingExperience } from '@/features/landing/landing-experience';
 import { AuthProvider, useAuth } from '@/lib/auth/auth-context';
 import { AppQueryProvider } from '@/lib/query/query-provider';
@@ -43,8 +45,27 @@ function RootContent() {
     return <BootScreen />;
   }
 
-  return user ? <AppTabs /> : <LandingExperience />;
+  return user ? (
+    <View style={styles.shell}>
+      <View style={styles.content}>
+        <Slot />
+      </View>
+      <BottomNav />
+    </View>
+  ) : (
+    <LandingExperience />
+  );
 }
+
+const styles = StyleSheet.create({
+  shell: {
+    flex: 1,
+    backgroundColor: KueColors.background,
+  },
+  content: {
+    flex: 1,
+  },
+});
 
 export default function RootLayout() {
   return (

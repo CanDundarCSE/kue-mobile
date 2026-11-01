@@ -22,6 +22,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { BottomNav } from '@/components/bottom-nav';
 import { NotificationsRealtime } from '@/features/notifications/notifications-realtime';
+import { AppUpdatePrompt } from '@/features/updates/app-update-prompt';
 import { BootScreen } from '@/components/boot-screen';
 import { KueColors } from '@/constants/kue-theme';
 import { LandingExperience } from '@/features/landing/landing-experience';
@@ -58,6 +59,7 @@ function RootContent() {
   return (
     <View style={styles.shell}>
       <NotificationsRealtime />
+      <AppUpdatePrompt />
       {user ? (
         <>
           <View key={resolved} style={styles.content}>

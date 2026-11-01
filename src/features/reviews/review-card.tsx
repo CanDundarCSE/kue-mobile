@@ -7,6 +7,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { BottomSheet } from '@/components/bottom-sheet';
 import { KueColors, KueFonts, KueSpacing } from '@/constants/kue-theme';
 import type { UserReview } from '@/lib/api/reviews';
+import { SpoilerText } from '@/features/reviews/spoiler-text';
 import { mediaHref } from '@/lib/media-href';
 
 const TYPE_LABEL: Record<string, string> = {
@@ -26,7 +27,6 @@ function formatDate(value: string) {
 /** One review row, used on public profiles and the all-reviews page. */
 export function ReviewCard({ review, clamp = true }: { review: UserReview; clamp?: boolean }) {
   const router = useRouter();
-  const [revealed, setRevealed] = useState(!review.containsSpoilers);
   const [open, setOpen] = useState(false);
 
   return (
@@ -79,28 +79,27 @@ export function ReviewCard({ review, clamp = true }: { review: UserReview; clamp
           </View>
         </View>
 
-        {revealed ? (
-          clamp ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={`Read full review of ${review.mediaTitle}`}
-              onPress={() => setOpen(true)}>
-              <Text style={styles.content} numberOfLines={3}>
-                {review.content}
-              </Text>
-              <Text style={styles.readMore}>Read full review</Text>
-            </Pressable>
-          ) : (
-            <Text style={styles.content}>{review.content}</Text>
-          )
-        ) : (
+        {clamp ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Show spoiler review"
-            onPress={() => setRevealed(true)}
-            style={styles.spoilerBox}>
-            <Text style={styles.spoilerText}>Contains spoilers · tap to read</Text>
+            accessibilityLabel={`Read full review of ${review.mediaTitle}`}
+            onPress={() => setOpen(true)}>
+            <SpoilerText
+              content={review.content}
+              spoilers={review.spoilers ?? []}
+              maskAll={review.containsSpoilers && (review.spoilers?.length ?? 0) === 0}
+              style={styles.content}
+              numberOfLines={3}
+            />
+            <Text style={styles.readMore}>Read full review</Text>
           </Pressable>
+        ) : (
+          <SpoilerText
+            content={review.content}
+            spoilers={review.spoilers ?? []}
+            maskAll={review.containsSpoilers && (review.spoilers?.length ?? 0) === 0}
+            style={styles.content}
+          />
         )}
       </View>
 
@@ -122,17 +121,12 @@ export function ReviewCard({ review, clamp = true }: { review: UserReview; clamp
           ) : null}
         </View>
 
-        {review.containsSpoilers && !revealed ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Show spoiler review"
-            onPress={() => setRevealed(true)}
-            style={styles.spoilerBox}>
-            <Text style={styles.spoilerText}>Contains spoilers · tap to read</Text>
-          </Pressable>
-        ) : (
-          <Text style={styles.sheetContent}>{review.content}</Text>
-        )}
+        <SpoilerText
+          content={review.content}
+          spoilers={review.spoilers ?? []}
+          maskAll={review.containsSpoilers && (review.spoilers?.length ?? 0) === 0}
+          style={styles.sheetContent}
+        />
 
         <Pressable
           accessibilityRole="button"

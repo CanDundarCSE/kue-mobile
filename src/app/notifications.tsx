@@ -58,13 +58,23 @@ export default function NotificationsScreen() {
     await queryClient.invalidateQueries({ queryKey: ['notifications-unread'] });
   };
 
-  const markRead = async (item: NotificationItem) => {
-    if (item.isRead) return;
-    try {
-      await markNotificationRead(item.id);
-      await refresh();
-    } catch {
-      // Leave the row visible; the next refresh corrects it.
+  const openItem = async (item: NotificationItem) => {
+    if (!item.isRead) {
+      try {
+        await markNotificationRead(item.id);
+        await refresh();
+      } catch {
+        // Keep the row; the next refresh corrects it.
+      }
+    }
+
+    if (item.type.startsWith('friend_request')) {
+      router.push('/friends');
+      return;
+    }
+
+    if (item.referenceType === 'media' && item.referenceId) {
+      router.push(`/media/${item.referenceId}` as never);
     }
   };
 
@@ -160,7 +170,7 @@ export default function NotificationsScreen() {
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={`${item.title}. ${item.message}`}
-                onPress={() => void markRead(item)}
+                onPress={() => void openItem(item)}
                 style={styles.rowMain}>
                 <UserAvatar username={item.actorUsername ?? 'K'} size={36} />
                 <View style={styles.rowBody}>

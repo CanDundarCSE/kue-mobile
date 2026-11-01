@@ -29,6 +29,12 @@ export async function fetchNotifications(page = 1, pageSize = 30): Promise<{
   };
 }
 
+export async function fetchHubToken(): Promise<string> {
+  const data = await apiJson<{ token?: string }>('/me/hub-token', { method: 'POST' });
+  if (!data.token) throw new Error('Hub authentication returned an invalid token.');
+  return data.token;
+}
+
 export async function fetchUnreadCount(): Promise<number> {
   const data = await apiJson<{ count?: number; unreadCount?: number }>(
     '/me/notifications/unread-count',

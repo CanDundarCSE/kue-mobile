@@ -1,3 +1,5 @@
+import '@/theme/styles';
+
 import { FragmentMono_400Regular } from '@expo-google-fonts/fragment-mono';
 import { InstrumentSerif_400Regular } from '@expo-google-fonts/instrument-serif';
 import {
@@ -7,7 +9,12 @@ import {
   Montserrat_700Bold,
 } from '@expo-google-fonts/montserrat';
 import { useFonts } from 'expo-font';
-import { DarkTheme, Slot, ThemeProvider } from 'expo-router';
+import {
+  DarkTheme,
+  DefaultTheme,
+  Slot,
+  ThemeProvider as NavigationThemeProvider,
+} from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -19,11 +26,13 @@ import { KueColors } from '@/constants/kue-theme';
 import { LandingExperience } from '@/features/landing/landing-experience';
 import { AuthProvider, useAuth } from '@/lib/auth/auth-context';
 import { AppQueryProvider } from '@/lib/query/query-provider';
+import { ThemeProvider as AppThemeProvider, useTheme } from '@/theme/theme-provider';
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 function RootContent() {
   const { user, loading } = useAuth();
+  const { resolved } = useTheme();
   const [fontsLoaded, fontError] = useFonts({
     Montserrat_400Regular,
     Montserrat_500Medium,
@@ -45,15 +54,34 @@ function RootContent() {
     return <BootScreen />;
   }
 
-  return user ? (
+  return (
     <View style={styles.shell}>
-      <View style={styles.content}>
-        <Slot />
-      </View>
-      <BottomNav />
+      {user ? (
+        <>
+          <View key={resolved} style={styles.content}>
+            <Slot key={resolved} />
+          </View>
+          <BottomNav />
+        </>
+      ) : (
+        <LandingExperience />
+      )}
     </View>
-  ) : (
-    <LandingExperience />
+  );
+}
+
+function ThemeSwitch() {
+  const { resolved } = useTheme();
+  return <ThemedNavigation key={resolved} />;
+}
+
+function ThemedNavigation() {
+  const { resolved } = useTheme();
+
+  return (
+    <NavigationThemeProvider value={resolved === 'dark' ? DarkTheme : DefaultTheme}>
+      <RootContent />
+    </NavigationThemeProvider>
   );
 }
 
@@ -72,9 +100,9 @@ export default function RootLayout() {
     <AppQueryProvider>
       <AuthProvider>
         <SafeAreaProvider>
-          <ThemeProvider value={DarkTheme}>
-            <RootContent />
-          </ThemeProvider>
+          <AppThemeProvider>
+            <ThemeSwitch />
+          </AppThemeProvider>
         </SafeAreaProvider>
       </AuthProvider>
     </AppQueryProvider>

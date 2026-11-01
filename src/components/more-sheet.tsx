@@ -1,5 +1,13 @@
 import { type Href, useRouter } from 'expo-router';
-import { ChartColumn, ChevronRight, Gamepad2, Star, User, type LucideIcon } from 'lucide-react-native';
+import {
+  ChartColumn,
+  ChevronRight,
+  Gamepad2,
+  Settings,
+  Star,
+  User,
+  type LucideIcon,
+} from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Animated, Easing, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,6 +21,7 @@ const ITEMS: SheetItem[] = [
   { label: 'Reviews', href: '/reviews', Icon: Star },
   { label: 'Stats', href: '/stats', Icon: ChartColumn },
   { label: 'Profile', href: '/profile', Icon: User },
+  { label: 'Settings', href: '/settings', Icon: Settings },
 ];
 
 /** Routes reachable from the sheet, used to keep the More tab highlighted. */

@@ -2,26 +2,18 @@
  * Kue dark palette, ported from the web app's `globals.css` dark theme.
  * The app is dark-first, so these are the only active values.
  */
-export const KueColors = {
-  background: "#111113",
-  foreground: "#f1f1ed",
-  surface2: "#1a1a1d",
-  surface3: "#222226",
-  line: "#27272b",
-  line2: "#3a3a40",
-  ink2: "#a6a69e",
-  ink3: "#70706a",
-  accent: "#7e8fff",
-  accent2: "#98a5ff",
-  accentSoft: "#1d2138",
-  danger: "#d9705a",
-  movie: "#d9705a",
-  series: "#cfa544",
-  game: "#5fae7c",
-  anime: "#c4708f",
-  manga: "#5e93b0",
-  white: "#ffffff",
-} as const;
+import { currentPalette, type Palette } from '@/theme/palette';
+
+/**
+ * Live palette: reads the active theme on every access, so inline color props
+ * (icon tints, props) follow a runtime theme switch.
+ */
+export const KueColors: Palette = new Proxy({} as Palette, {
+  get: (_target, key: string | symbol) => currentPalette()[key as keyof Palette],
+  has: (_target, key: string | symbol) => key in currentPalette(),
+  ownKeys: () => Object.keys(currentPalette()),
+  getOwnPropertyDescriptor: () => ({ enumerable: true, configurable: true }),
+});
 
 export const KueSpacing = {
   xs: 4,

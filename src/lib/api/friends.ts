@@ -24,6 +24,18 @@ export type FriendRequest = {
   createdAt: string;
 };
 
+export type UserProfileCounts = {
+  totalLibraryItems: number;
+  completedItems: number;
+  inProgressItems: number;
+  planningItems: number;
+  onHoldItems: number;
+  droppedItems: number;
+  favoritesCount: number;
+  listsCount: number;
+  ratingsCount: number;
+};
+
 export type PublicProfile = {
   id: number;
   username: string;
@@ -33,9 +45,71 @@ export type PublicProfile = {
   isPrivate: boolean;
   isFriend: boolean;
   friendshipStatus: string;
+  joinedAt?: string;
+  counts?: UserProfileCounts | null;
 };
 
 type Message = { message?: string };
+
+export function fetchUserProfile(username: string): Promise<PublicProfile> {
+  return apiJson<PublicProfile>(`/users/${encodeURIComponent(username.trim())}`);
+}
+
+export type UserLibraryEntry = {
+  mediaId: number;
+  isFavorite: boolean;
+  media?: {
+    title?: string;
+    mediaType?: string;
+    coverImage?: string | null;
+    year?: number | null;
+  } | null;
+};
+
+export type UserList = {
+  id: number;
+  name: string;
+  description?: string | null;
+  isPublic: boolean;
+  visibility?: string;
+  itemCount: number;
+  previewCoverImages?: string[];
+};
+
+export type UserActivityDay = {
+  date: string;
+  added: number;
+  completed: number;
+  total?: number;
+};
+
+export async function fetchUserLibrary(username: string): Promise<UserLibraryEntry[]> {
+  const data = await apiJson<{ items?: UserLibraryEntry[] }>(
+    `/users/${encodeURIComponent(username)}/library?pageSize=100`,
+  );
+  return data.items ?? [];
+}
+
+export async function fetchUserLists(username: string): Promise<UserList[]> {
+  const data = await apiJson<{ items?: UserList[] }>(
+    `/users/${encodeURIComponent(username)}/lists?pageSize=20`,
+  );
+  return data.items ?? [];
+}
+
+export async function fetchUserActivity(
+  username: string,
+  days = 30,
+): Promise<UserActivityDay[]> {
+  const data = await apiJson<{ dailySummaries?: UserActivityDay[] }>(
+    `/users/${encodeURIComponent(username)}/activity?days=${days}`,
+  );
+  return data.dailySummaries ?? [];
+}
+
+export function fetchUserFriends(username: string): Promise<Friend[]> {
+  return apiJson<Friend[]>(`/users/${encodeURIComponent(username)}/friends`);
+}
 
 export function fetchFriends(): Promise<Friend[]> {
   return apiJson<Friend[]>('/friends');

@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { QrCode, Search, UserMinus, UserPlus, X } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
   ActivityIndicator,
@@ -46,6 +47,7 @@ function errorMessage(cause: unknown, fallback: string) {
 
 export default function FriendsScreen() {
   const { user } = useAuth();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { contentWidth, gutter } = useResponsive();
 
@@ -299,15 +301,26 @@ export default function FriendsScreen() {
                 <View style={styles.list}>
                   {filteredFriends.map((friend) => (
                     <View key={friend.friendshipId} style={styles.row}>
-                      <UserAvatar username={friend.username} avatarId={friend.avatarId} size={44} />
-                      <View style={styles.rowBody}>
-                        <Text style={styles.rowTitle} numberOfLines={1}>
-                          {friend.username}
-                        </Text>
-                        <Text style={styles.rowMeta} numberOfLines={1}>
-                          {friend.kueId ?? 'Friend'}
-                        </Text>
-                      </View>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={`Open ${friend.username} profile`}
+                        onPress={() =>
+                          router.push({
+                            pathname: '/profile/[username]',
+                            params: { username: friend.username },
+                          })
+                        }
+                        style={styles.rowMain}>
+                        <UserAvatar username={friend.username} avatarId={friend.avatarId} size={44} />
+                        <View style={styles.rowBody}>
+                          <Text style={styles.rowTitle} numberOfLines={1}>
+                            {friend.username}
+                          </Text>
+                          <Text style={styles.rowMeta} numberOfLines={1}>
+                            {friend.kueId ?? 'Friend'}
+                          </Text>
+                        </View>
+                      </Pressable>
                       <Pressable
                         accessibilityRole="button"
                         accessibilityLabel={`Manage ${friend.username}`}
@@ -671,6 +684,12 @@ const styles = StyleSheet.create({
     paddingVertical: KueSpacing.sm,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: KueColors.line,
+  },
+  rowMain: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: KueSpacing.md,
   },
   rowBody: {
     flex: 1,

@@ -54,6 +54,12 @@ async function persistSession(response: AuthResponse): Promise<void> {
   ]);
 }
 
+/** Persists a profile update without touching the tokens. */
+export async function saveUser(user: AuthUser): Promise<void> {
+  currentUser = user;
+  await SecureStore.setItemAsync(USER_KEY, JSON.stringify(user));
+}
+
 export async function clearSession(): Promise<void> {
   accessToken = null;
   currentUser = null;

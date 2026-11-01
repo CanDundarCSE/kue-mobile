@@ -11,6 +11,7 @@ import type { AuthUser } from "@/lib/api/types";
 import {
   register as registerRequest,
   restoreSession,
+  saveUser,
   signIn as signInRequest,
   signOut as signOutRequest,
 } from "@/lib/auth/session";
@@ -21,6 +22,7 @@ type AuthContextValue = {
   signIn: (email: string, password: string) => Promise<AuthUser>;
   register: (username: string, email: string, password: string) => Promise<AuthUser>;
   signOut: () => Promise<void>;
+  updateUser: (next: AuthUser) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -68,8 +70,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
+  const updateUser = useCallback(async (next: AuthUser) => {
+    setUser(next);
+    await saveUser(next);
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, register, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signIn, register, signOut, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

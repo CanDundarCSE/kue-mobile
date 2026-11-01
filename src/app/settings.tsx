@@ -17,6 +17,7 @@ import { UserAvatar } from '@/components/user-avatar';
 import { WEB_BASE_URL } from '@/lib/api/config';
 import { KueColors, KueFonts, KueSpacing } from '@/constants/kue-theme';
 import { EditProfileSheet } from '@/features/profile/edit-profile-sheet';
+import { NuvioSection } from '@/features/settings/nuvio-section';
 import { changePassword, deleteAccount, updateMe } from '@/lib/api/me';
 import { useAuth } from '@/lib/auth/auth-context';
 import { useResponsive } from '@/lib/responsive';
@@ -224,6 +225,8 @@ export default function SettingsScreen() {
               </Pressable>
             </View>
           </View>
+
+          <NuvioSection />
 
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Appearance</Text>

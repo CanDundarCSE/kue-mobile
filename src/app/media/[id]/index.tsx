@@ -18,6 +18,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Skeleton } from '@/components/skeleton';
+import { SpoilerText } from '@/features/reviews/spoiler-text';
 import { KueColors, KueFonts, KueSpacing } from '@/constants/kue-theme';
 import { MEDIA_ACCENT } from '@/features/library/library-row';
 import {
@@ -553,13 +554,28 @@ export default function MediaDetailScreen() {
             </View>
           ) : null}
 
-          {reviews.length > 0 ? (
-            <View style={styles.card}>
-              <View style={styles.cardHeader}>
-                <Text style={styles.cardTitle}>Reviews</Text>
-                <View style={styles.rule} />
-              </View>
-              {reviews.map((review) => (
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <Text style={styles.cardTitle}>Reviews</Text>
+              <View style={styles.rule} />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="All reviews"
+                hitSlop={8}
+                onPress={() =>
+                  router.push({
+                    pathname: '/media/[id]/reviews',
+                    params: { id: String(media.id) },
+                  })
+                }>
+                <Text style={styles.allReviews}>All reviews →</Text>
+              </Pressable>
+            </View>
+
+            {reviews.length === 0 ? (
+              <Text style={styles.hint}>No reviews yet. Open all reviews to write one.</Text>
+            ) : (
+              reviews.map((review) => (
                 <View key={review.id} style={styles.review}>
                   <View style={styles.reviewTop}>
                     <Text style={styles.reviewUser} numberOfLines={1}>
@@ -569,16 +585,17 @@ export default function MediaDetailScreen() {
                       <Text style={styles.reviewRating}>{review.rating}/10</Text>
                     ) : null}
                   </View>
-                  <Text style={styles.reviewBody} numberOfLines={4}>
-                    {review.content}
-                  </Text>
-                  {review.containsSpoilers ? (
-                    <Text style={styles.reviewSpoiler}>Contains spoilers</Text>
-                  ) : null}
+                  <SpoilerText
+                    content={review.content}
+                    spoilers={review.spoilers ?? []}
+                    maskAll={review.containsSpoilers && (review.spoilers?.length ?? 0) === 0}
+                    style={styles.reviewBody}
+                    numberOfLines={4}
+                  />
                 </View>
-              ))}
-            </View>
-          ) : null}
+              ))
+            )}
+          </View>
         </ScrollView>
       </SafeAreaView>
     </View>
@@ -1061,6 +1078,13 @@ const styles = StyleSheet.create({
     color: KueColors.accent,
     fontFamily: KueFonts.mono,
     fontSize: 10,
+  },
+  allReviews: {
+    color: KueColors.accent,
+    fontFamily: KueFonts.mono,
+    fontSize: 9,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   reviewBody: {
     color: KueColors.ink2,

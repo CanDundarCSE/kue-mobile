@@ -107,6 +107,7 @@ export function ProfileFavorites({ username, enabled }: { username: string; enab
 }
 
 export function ProfileLists({ username, enabled }: { username: string; enabled: boolean }) {
+  const router = useRouter();
   const query = useQuery({
     queryKey: ['user-lists', username],
     queryFn: () => fetchUserLists(username),
@@ -131,7 +132,13 @@ export function ProfileLists({ username, enabled }: { username: string; enabled:
       ) : (
         <View style={styles.listStack}>
           {lists.map((list) => (
-            <ListCard key={list.id} list={list} />
+            <ListCard
+              key={list.id}
+              list={list}
+              onPress={() =>
+                router.push({ pathname: '/lists/[id]', params: { id: String(list.id) } })
+              }
+            />
           ))}
         </View>
       )}
@@ -139,12 +146,16 @@ export function ProfileLists({ username, enabled }: { username: string; enabled:
   );
 }
 
-function ListCard({ list }: { list: UserList }) {
+function ListCard({ list, onPress }: { list: UserList; onPress: () => void }) {
   const visibility = list.visibility === 'private' ? 'Private' : list.visibility === 'friends' ? 'Friends' : 'Public';
   const Icon = visibility === 'Private' ? Lock : visibility === 'Friends' ? Users : Globe;
 
   return (
-    <View style={styles.listCard}>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`Open list ${list.name}`}
+      onPress={onPress}
+      style={({ pressed }) => [styles.listCard, pressed && styles.pressed]}>
       <View style={styles.listHeader}>
         <Text style={styles.listName} numberOfLines={1}>
           {list.name}
@@ -176,7 +187,7 @@ function ListCard({ list }: { list: UserList }) {
           ))}
         </View>
       ) : null}
-    </View>
+    </Pressable>
   );
 }
 

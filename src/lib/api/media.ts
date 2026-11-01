@@ -30,6 +30,7 @@ export type MediaReview = {
   content: string;
   rating?: number | null;
   containsSpoilers: boolean;
+  spoilers?: { start: number; end: number }[] | null;
   createdAt: string;
 };
 
@@ -97,7 +98,7 @@ export async function fetchLibraryEntry(mediaId: number): Promise<MediaLibraryEn
 
 export async function fetchMediaReviews(mediaId: number, pageSize = 3): Promise<MediaReview[]> {
   const page = await apiJson<Paged<MediaReview>>(
-    `/reviews/media/${mediaId}/reviews?pageSize=${pageSize}`,
+    `/media/${mediaId}/reviews?pageSize=${pageSize}`,
   );
   return page.items ?? [];
 }

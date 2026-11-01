@@ -43,6 +43,7 @@ export type ComposerMedia = {
 
 export function ReviewComposer({
   review,
+  initialMedia,
   busy,
   error,
   onSubmit,
@@ -50,6 +51,8 @@ export function ReviewComposer({
 }: {
   /** Present when editing an existing review. */
   review: UserReview | null;
+  /** Seeds a new review with a title picked elsewhere (e.g. media detail). */
+  initialMedia?: ComposerMedia | null;
   busy: boolean;
   error: string | null;
   onSubmit: (payload: ReviewPayload & { mediaId: number }) => void;
@@ -64,7 +67,7 @@ export function ReviewComposer({
           coverImage: review.mediaCoverImage,
           year: review.mediaYear,
         }
-      : null,
+      : (initialMedia ?? null),
   );
   const [content, setContent] = useState(review?.content ?? '');
   const [rating, setRating] = useState<number | null>(review?.rating ?? null);
@@ -78,7 +81,7 @@ export function ReviewComposer({
   const libraryQuery = useQuery({
     queryKey: ['library-picker'],
     queryFn: () => fetchLibrary({ page: 1, pageSize: 100 }),
-    enabled: review === null,
+    enabled: review === null && initialMedia === undefined,
     staleTime: 60_000,
   });
 

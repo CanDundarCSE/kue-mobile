@@ -2,6 +2,8 @@ import { apiJson } from '@/lib/auth/session';
 
 export type CustomList = {
   id: number;
+  userId?: number;
+  username?: string;
   name: string;
   description?: string | null;
   visibility: string;
@@ -42,6 +44,29 @@ export async function fetchMyLists(): Promise<CustomList[]> {
 
 export function fetchListDetail(listId: number): Promise<CustomListDetail> {
   return apiJson<CustomListDetail>(`/me/lists/${listId}`);
+}
+
+/** A list another user shared with you (public or friends-visible). */
+export function fetchPublicListDetail(listId: number): Promise<CustomListDetail> {
+  return apiJson<CustomListDetail>(`/lists/${listId}`);
+}
+
+export function updateListItemNotes(
+  listId: number,
+  mediaId: number,
+  notes: string | null,
+): Promise<unknown> {
+  return apiJson(`/me/lists/${listId}/items/${mediaId}`, {
+    method: 'PUT',
+    body: JSON.stringify({ notes }),
+  });
+}
+
+export function reorderListItems(listId: number, mediaIds: number[]): Promise<unknown> {
+  return apiJson(`/me/lists/${listId}/reorder`, {
+    method: 'POST',
+    body: JSON.stringify({ mediaIds }),
+  });
 }
 
 export function createList(payload: ListPayload): Promise<CustomList> {

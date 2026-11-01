@@ -1,11 +1,12 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeft, Pencil, Plus, Trash2, X } from 'lucide-react-native';
+import { ArrowDown, ArrowLeft, ArrowUp, Pencil, Plus, StickyNote, Trash2, X } from 'lucide-react-native';
 import { useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
+  TextInput,
   ScrollView,
   StyleSheet,
   Text,
@@ -22,9 +23,15 @@ import {
   addListItem,
   deleteList,
   fetchListDetail,
+  fetchPublicListDetail,
   removeListItem,
+  reorderListItems,
+  updateListItemNotes,
 } from '@/lib/api/lists';
+import { ApiError } from '@/lib/api/types';
+import { useAuth } from '@/lib/auth/auth-context';
 import { mediaHref } from '@/lib/media-href';
+import type { CustomListItem } from '@/lib/api/lists';
 import { useResponsive } from '@/lib/responsive';
 
 const TYPE_LABEL: Record<string, string> = {
@@ -46,20 +53,34 @@ export default function ListDetailScreen() {
   const { contentWidth, gutter } = useResponsive();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const listId = Number(first(id)) || 0;
+  const { user } = useAuth();
 
   const [editing, setEditing] = useState(false);
   const [picking, setPicking] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [noteItem, setNoteItem] = useState<CustomListItem | null>(null);
+  const [noteText, setNoteText] = useState('');
+  const [savingNote, setSavingNote] = useState(false);
 
   const listQuery = useQuery({
     queryKey: ['list', listId],
-    queryFn: () => fetchListDetail(listId),
+    queryFn: async () => {
+      try {
+        return await fetchListDetail(listId);
+      } catch (cause) {
+        if (cause instanceof ApiError && cause.status === 404) {
+          return fetchPublicListDetail(listId);
+        }
+        throw cause;
+      }
+    },
     enabled: listId > 0,
   });
 
   const list = listQuery.data;
+  const isOwner = list ? list.userId === undefined || list.userId === user?.id : false;
   const items = list?.items ?? [];
 
   const refresh = async () => {
@@ -95,6 +116,45 @@ export default function ListDetailScreen() {
       setError(cause instanceof Error ? cause.message : 'Could not remove that title.');
     } finally {
       setBusyId(null);
+    }
+  };
+
+  const move = async (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= items.length || busyId !== null) return;
+
+    const next = items.map((item) => item.mediaId);
+    [next[index], next[target]] = [next[target], next[index]];
+
+    setBusyId(items[index].mediaId);
+    setError(null);
+    try {
+      await reorderListItems(listId, next);
+      await refresh();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not reorder this list.');
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const openNotes = (item: CustomListItem) => {
+    setNoteItem(item);
+    setNoteText(item.notes ?? '');
+  };
+
+  const saveNotes = async () => {
+    if (!noteItem) return;
+    setSavingNote(true);
+    setError(null);
+    try {
+      await updateListItemNotes(listId, noteItem.mediaId, noteText.trim() || null);
+      setNoteItem(null);
+      await refresh();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not save the note.');
+    } finally {
+      setSavingNote(false);
     }
   };
 
@@ -159,6 +219,7 @@ export default function ListDetailScreen() {
                   <Text style={styles.description}>{list.description}</Text>
                 ) : null}
 
+                {isOwner ? (
                 <View style={styles.actions}>
                   <Pressable
                     accessibilityRole="button"
@@ -177,20 +238,23 @@ export default function ListDetailScreen() {
                     <Text style={[styles.ghostLabel, styles.dangerLabel]}>Delete</Text>
                   </Pressable>
                 </View>
+                ) : null}
               </View>
 
               {error ? <Text style={styles.error}>{error}</Text> : null}
 
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>Titles</Text>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Add a title"
-                  onPress={() => setPicking(true)}
-                  style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}>
-                  <Plus color={KueColors.accent} size={13} strokeWidth={2.2} />
-                  <Text style={styles.addLabel}>Add title</Text>
-                </Pressable>
+                {isOwner ? (
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Add a title"
+                    onPress={() => setPicking(true)}
+                    style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}>
+                    <Plus color={KueColors.accent} size={13} strokeWidth={2.2} />
+                    <Text style={styles.addLabel}>Add title</Text>
+                  </Pressable>
+                ) : null}
               </View>
 
               {items.length === 0 ? (
@@ -200,7 +264,7 @@ export default function ListDetailScreen() {
                 </View>
               ) : (
                 <View style={styles.itemStack}>
-                  {items.map((item) => (
+                  {items.map((item, index) => (
                     <View key={item.id} style={styles.item}>
                       <Pressable
                         accessibilityRole="button"
@@ -234,22 +298,60 @@ export default function ListDetailScreen() {
                               .filter(Boolean)
                               .join(' · ')}
                           </Text>
+                          {item.notes ? (
+                            <Text style={styles.itemNotes} numberOfLines={2}>
+                              {item.notes}
+                            </Text>
+                          ) : null}
                         </View>
                       </Pressable>
 
-                      <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel={`Remove ${item.media.title}`}
-                        disabled={busyId !== null}
-                        hitSlop={6}
-                        onPress={() => void removeItem(item.mediaId)}
-                        style={({ pressed }) => [styles.removeButton, pressed && styles.pressed]}>
-                        {busyId === item.mediaId ? (
-                          <ActivityIndicator color={KueColors.ink3} size="small" />
-                        ) : (
-                          <X color={KueColors.ink3} size={16} strokeWidth={2} />
-                        )}
-                      </Pressable>
+                      {isOwner ? (
+                        <View style={styles.itemActions}>
+                          <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={`Move ${item.media.title} up`}
+                            disabled={index === 0 || busyId !== null}
+                            hitSlop={4}
+                            onPress={() => void move(index, -1)}
+                            style={[styles.smallIcon, (index === 0 || busyId !== null) && styles.faded]}>
+                            <ArrowUp color={KueColors.ink3} size={14} strokeWidth={2} />
+                          </Pressable>
+                          <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={`Move ${item.media.title} down`}
+                            disabled={index === items.length - 1 || busyId !== null}
+                            hitSlop={4}
+                            onPress={() => void move(index, 1)}
+                            style={[
+                              styles.smallIcon,
+                              (index === items.length - 1 || busyId !== null) && styles.faded,
+                            ]}>
+                            <ArrowDown color={KueColors.ink3} size={14} strokeWidth={2} />
+                          </Pressable>
+                          <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={`Edit notes for ${item.media.title}`}
+                            hitSlop={4}
+                            onPress={() => openNotes(item)}
+                            style={styles.smallIcon}>
+                            <StickyNote color={KueColors.ink3} size={14} strokeWidth={1.8} />
+                          </Pressable>
+                        <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={`Remove ${item.media.title}`}
+                            disabled={busyId !== null}
+                            hitSlop={6}
+                            onPress={() => void removeItem(item.mediaId)}
+                            style={({ pressed }) => [styles.removeButton, pressed && styles.pressed]}>
+                            {busyId === item.mediaId ? (
+                              <ActivityIndicator color={KueColors.ink3} size="small" />
+                            ) : (
+                              <X color={KueColors.ink3} size={16} strokeWidth={2} />
+                            )}
+                          </Pressable>
+                        </View>
+                      ) : null}
                     </View>
                   ))}
                 </View>
@@ -259,7 +361,7 @@ export default function ListDetailScreen() {
         </ScrollView>
       </SafeAreaView>
 
-      {editing && list ? (
+      {editing && list && isOwner ? (
         <ListEditor
           list={list}
           onClose={() => setEditing(false)}
@@ -267,7 +369,7 @@ export default function ListDetailScreen() {
         />
       ) : null}
 
-      {picking ? (
+      {picking && isOwner ? (
         <ListPicker
           exclude={new Set(items.map((item) => item.mediaId))}
           busyId={busyId}
@@ -276,7 +378,46 @@ export default function ListDetailScreen() {
         />
       ) : null}
 
-      <BottomSheet visible={deleting} onClose={() => setDeleting(false)}>
+      <BottomSheet visible={noteItem !== null} onClose={() => setNoteItem(null)}>
+        <Text style={styles.sheetTitle}>Note</Text>
+        <Text style={styles.sheetBody} numberOfLines={2}>
+          {noteItem?.media.title}
+        </Text>
+        <TextInput
+          value={noteText}
+          onChangeText={setNoteText}
+          placeholder="Why is this here?"
+          placeholderTextColor={KueColors.ink3}
+          multiline
+          textAlignVertical="top"
+          maxLength={500}
+          style={styles.noteInput}
+          accessibilityLabel="List item note"
+        />
+        <View style={styles.sheetActions}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Cancel note"
+            onPress={() => setNoteItem(null)}
+            style={({ pressed }) => [styles.keepButton, pressed && styles.pressed]}>
+            <Text style={styles.keepLabel}>Cancel</Text>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Save note"
+            disabled={savingNote}
+            onPress={() => void saveNotes()}
+            style={({ pressed }) => [styles.saveNoteButton, pressed && styles.pressed]}>
+            {savingNote ? (
+              <ActivityIndicator color={KueColors.background} size="small" />
+            ) : (
+              <Text style={styles.deleteLabel}>Save</Text>
+            )}
+          </Pressable>
+        </View>
+      </BottomSheet>
+
+      <BottomSheet visible={deleting && isOwner} onClose={() => setDeleting(false)}>
         <Text style={styles.sheetTitle}>Delete this list?</Text>
         <Text style={styles.sheetBody}>
           “{list?.name}” and its place on your profile will be removed. The titles stay in your
@@ -473,6 +614,47 @@ const styles = StyleSheet.create({
     fontFamily: KueFonts.mono,
     fontSize: 9,
     letterSpacing: 0.8,
+  },
+  itemNotes: {
+    color: KueColors.ink2,
+    fontFamily: KueFonts.sans,
+    fontSize: 11,
+    lineHeight: 15,
+    marginTop: 2,
+  },
+  itemActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  smallIcon: {
+    width: 30,
+    height: 34,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  faded: {
+    opacity: 0.3,
+  },
+  noteInput: {
+    minHeight: 100,
+    borderRadius: 10,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: KueColors.line2,
+    backgroundColor: KueColors.background,
+    padding: KueSpacing.md,
+    color: KueColors.foreground,
+    fontFamily: KueFonts.sans,
+    fontSize: 13,
+    lineHeight: 19,
+  },
+  saveNoteButton: {
+    flex: 1,
+    minHeight: 48,
+    borderRadius: 12,
+    backgroundColor: KueColors.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   removeButton: {
     width: 36,

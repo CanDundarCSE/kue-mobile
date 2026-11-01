@@ -2,6 +2,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { KueColors, KueFonts, KueSpacing } from '@/constants/kue-theme';
+import { NotificationBell } from '@/features/notifications/notification-bell';
 import { UserAvatar } from '@/components/user-avatar';
 import { LogoMark } from '@/features/landing/components/logo-mark';
 import { ContinueCard } from '@/features/home/continue-card';
@@ -44,7 +45,10 @@ export default function HomeScreen() {
               <LogoMark size={10} />
               <Text style={styles.brandText}>KUE</Text>
             </View>
-            <UserAvatar username={user?.username ?? 'there'} avatarId={user?.avatarId} />
+            <View style={styles.headerActions}>
+              <NotificationBell />
+              <UserAvatar username={user?.username ?? 'there'} avatarId={user?.avatarId} />
+            </View>
           </View>
 
           <View style={styles.greeting}>
@@ -86,6 +90,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: KueSpacing.md,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: KueSpacing.sm,
   },
   brand: {
     flexDirection: 'row',

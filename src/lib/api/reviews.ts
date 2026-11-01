@@ -84,6 +84,47 @@ export function deleteReview(reviewId: number): Promise<unknown> {
   return apiJson(`/me/reviews/${reviewId}`, { method: 'DELETE' });
 }
 
+export type MediaReviewSort = 'newest' | 'oldest' | 'highest' | 'lowest';
+
+export async function fetchMediaReviewPage(
+  mediaId: number,
+  options: { page?: number; pageSize?: number; sort?: MediaReviewSort; hideSpoilers?: boolean } = {},
+): Promise<ReviewPage> {
+  const query = new URLSearchParams({
+    page: String(options.page ?? 1),
+    pageSize: String(options.pageSize ?? 10),
+  });
+  if (options.sort) query.set('sort', options.sort);
+  if (options.hideSpoilers) query.set('hideSpoilers', 'true');
+
+  const data = await apiJson<{
+    items?: UserReview[];
+    page?: number;
+    pageSize?: number;
+    totalItems?: number;
+    totalPages?: number;
+  }>(`/media/${mediaId}/reviews?${query.toString()}`);
+
+  return {
+    items: data.items ?? [],
+    page: data.page ?? 1,
+    pageSize: data.pageSize ?? (options.pageSize ?? 10),
+    totalItems: data.totalItems ?? (data.items?.length ?? 0),
+    totalPages: data.totalPages ?? 0,
+  };
+}
+
+export async function fetchMyReviewForMedia(mediaId: number): Promise<UserReview | null> {
+  try {
+    return await apiJson<UserReview>(`/me/reviews/by-media/${mediaId}`);
+  } catch (cause) {
+    if (cause instanceof Error && 'status' in cause && (cause as { status: number }).status === 404) {
+      return null;
+    }
+    throw cause;
+  }
+}
+
 /** Public reviews written by one user. Private profiles return 403. */
 export async function fetchUserReviews(
   username: string,

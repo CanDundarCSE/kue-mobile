@@ -43,7 +43,8 @@
         {
           "cameraPermission": "Allow Kue to scan friend QR codes to send friend requests."
         }
-      ]
+      ],
+      "expo-build-properties"
     ],
     "experiments": {
       "typedRoutes": true,

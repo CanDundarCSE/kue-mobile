@@ -120,7 +120,7 @@ export async function register(input: {
   username: string;
   email: string;
   password: string;
-}): Promise<AuthUser> {
+}): Promise<string> {
   const response = await fetch(`${API_V1_URL}/auth/register`, {
     method: "POST",
     headers: authHeaders(),
@@ -143,9 +143,109 @@ export async function register(input: {
     throw errorFrom(response, body, "Could not create your account.");
   }
 
+  return messageFrom(body, "Check your email for a verification code.");
+}
+
+export async function verifyEmail(email: string, code: string): Promise<AuthUser> {
+  const response = await fetch(`${API_V1_URL}/auth/verify-email`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify({ email: email.trim(), code: code.trim() }),
+    signal: timeoutSignal(45_000),
+  }).catch(() => null);
+
+  if (!response) {
+    throw new ApiError("Couldn't reach the Kue API. Check your connection.", 0, null);
+  }
+
+  const body = await parseBody(response);
+  if (!response.ok) {
+    throw errorFrom(response, body, "Could not verify this code.");
+  }
+
   const auth = body as AuthResponse;
   await persistSession(auth);
   return auth.user;
+}
+
+export async function resendVerification(email: string): Promise<string> {
+  const response = await fetch(`${API_V1_URL}/auth/resend-verification`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify({ email: email.trim() }),
+    signal: timeoutSignal(45_000),
+  }).catch(() => null);
+
+  if (!response) {
+    throw new ApiError("Couldn't reach the Kue API. Check your connection.", 0, null);
+  }
+
+  const body = await parseBody(response);
+  if (!response.ok) {
+    throw errorFrom(response, body, "Could not resend the code.");
+  }
+
+  return messageFrom(body, "A new code is on its way.");
+}
+
+export async function requestPasswordReset(email: string): Promise<string> {
+  const response = await fetch(`${API_V1_URL}/auth/forgot-password`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify({ email: email.trim() }),
+    signal: timeoutSignal(45_000),
+  }).catch(() => null);
+
+  if (!response) {
+    throw new ApiError("Couldn't reach the Kue API. Check your connection.", 0, null);
+  }
+
+  const body = await parseBody(response);
+  if (!response.ok) {
+    throw errorFrom(response, body, "Could not request a reset code.");
+  }
+
+  return messageFrom(body, "If that email exists, a reset code has been sent.");
+}
+
+export async function resetPassword(
+  email: string,
+  code: string,
+  newPassword: string,
+): Promise<string> {
+  const response = await fetch(`${API_V1_URL}/auth/reset-password`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify({
+      email: email.trim(),
+      token: code.trim(),
+      newPassword,
+    }),
+    signal: timeoutSignal(45_000),
+  }).catch(() => null);
+
+  if (!response) {
+    throw new ApiError("Couldn't reach the Kue API. Check your connection.", 0, null);
+  }
+
+  const body = await parseBody(response);
+  if (!response.ok) {
+    throw errorFrom(response, body, "Could not reset your password.");
+  }
+
+  return messageFrom(body, "Password updated. You can sign in now.");
+}
+
+function messageFrom(body: unknown, fallback: string): string {
+  if (
+    body &&
+    typeof body === "object" &&
+    typeof (body as { message?: unknown }).message === "string" &&
+    (body as { message: string }).message.length > 0
+  ) {
+    return (body as { message: string }).message;
+  }
+  return fallback;
 }
 
 /**

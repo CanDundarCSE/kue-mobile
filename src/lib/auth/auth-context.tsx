@@ -10,17 +10,21 @@ import {
 import type { AuthUser } from "@/lib/api/types";
 import {
   register as registerRequest,
+  resendVerification as resendVerificationRequest,
   restoreSession,
   saveUser,
   signIn as signInRequest,
   signOut as signOutRequest,
+  verifyEmail as verifyEmailRequest,
 } from "@/lib/auth/session";
 
 type AuthContextValue = {
   user: AuthUser | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<AuthUser>;
-  register: (username: string, email: string, password: string) => Promise<AuthUser>;
+  register: (username: string, email: string, password: string) => Promise<string>;
+  verifyEmail: (email: string, code: string) => Promise<AuthUser>;
+  resendVerification: (email: string) => Promise<string>;
   signOut: () => Promise<void>;
   updateUser: (next: AuthUser) => Promise<void>;
 };
@@ -57,11 +61,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const register = useCallback(
-    async (username: string, email: string, password: string) => {
-      const nextUser = await registerRequest({ username, email, password });
-      setUser(nextUser);
-      return nextUser;
-    },
+    (username: string, email: string, password: string) =>
+      registerRequest({ username, email, password }),
+    [],
+  );
+
+  const verifyEmail = useCallback(async (email: string, code: string) => {
+    const nextUser = await verifyEmailRequest(email, code);
+    setUser(nextUser);
+    return nextUser;
+  }, []);
+
+  const resendVerification = useCallback(
+    (email: string) => resendVerificationRequest(email),
     [],
   );
 
@@ -76,7 +88,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, register, signOut, updateUser }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        signIn,
+        register,
+        verifyEmail,
+        resendVerification,
+        signOut,
+        updateUser,
+      }}>
       {children}
     </AuthContext.Provider>
   );

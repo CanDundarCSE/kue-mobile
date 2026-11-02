@@ -19,9 +19,11 @@ import { useAuth } from "@/lib/auth/auth-context";
 export function SignInSheet({
   visible,
   onClose,
+  onForgotPassword,
 }: {
   visible: boolean;
   onClose: () => void;
+  onForgotPassword: () => void;
 }) {
   const { signIn } = useAuth();
   const insets = useSafeAreaInsets();
@@ -41,6 +43,13 @@ export function SignInSheet({
   };
 
   const canSubmit = email.trim().length > 0 && password.length > 0 && !busy;
+
+  const forgot = () => {
+    setError(null);
+    setPassword("");
+    setPasswordVisible(false);
+    onForgotPassword();
+  };
 
   const submit = async () => {
     if (!canSubmit) return;
@@ -145,6 +154,17 @@ export function SignInSheet({
                 )}
               </Pressable>
             </View>
+
+            <Pressable
+              onPress={forgot}
+              hitSlop={8}
+              style={({ pressed }) => [styles.forgot, pressed && styles.pressed]}
+              accessibilityRole="button"
+              accessibilityLabel="Forgot password">
+              <Text maxFontSizeMultiplier={KueTextScale.control} style={styles.forgotLabel}>
+                Forgot password?
+              </Text>
+            </Pressable>
 
             {error ? (
               <Text maxFontSizeMultiplier={KueTextScale.control} style={styles.error}>
@@ -256,6 +276,17 @@ const styles = StyleSheet.create({
   },
   passwordInput: {
     paddingRight: 48,
+  },
+  forgot: {
+    alignSelf: "flex-end",
+    minHeight: 40,
+    justifyContent: "center",
+    marginTop: 2,
+  },
+  forgotLabel: {
+    color: KueColors.accent,
+    fontSize: 13,
+    fontWeight: "600",
   },
   eye: {
     position: "absolute",

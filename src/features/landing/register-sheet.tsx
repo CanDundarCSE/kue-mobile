@@ -23,7 +23,7 @@ export function RegisterSheet({
   visible: boolean;
   onClose: () => void;
 }) {
-  const { register } = useAuth();
+  const { register, verifyEmail, resendVerification } = useAuth();
   const insets = useSafeAreaInsets();
 
   const [username, setUsername] = useState("");
@@ -33,6 +33,9 @@ export function RegisterSheet({
   const [accepted, setAccepted] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [step, setStep] = useState<"form" | "verify">("form");
+  const [pendingEmail, setPendingEmail] = useState("");
+  const [code, setCode] = useState("");
 
   const emailRef = useRef<ComponentRef<typeof TextInput>>(null);
   const passwordRef = useRef<ComponentRef<typeof TextInput>>(null);
@@ -42,6 +45,9 @@ export function RegisterSheet({
     setPassword("");
     setPasswordVisible(false);
     setAccepted(false);
+    setStep("form");
+    setPendingEmail("");
+    setCode("");
     onClose();
   };
 
@@ -59,9 +65,45 @@ export function RegisterSheet({
 
     try {
       await register(username.trim(), email.trim(), password);
-      // AuthGate swaps to the signed-in shell once the user lands in context.
+      setPendingEmail(email.trim());
+      setCode("");
+      setError(null);
+      setStep("verify");
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not create your account.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const codeOk = code.replace(/[^A-Za-z0-9]/g, "").length === 8;
+
+  const verify = async () => {
+    if (!codeOk || busy) return;
+
+    setBusy(true);
+    setError(null);
+
+    try {
+      await verifyEmail(pendingEmail, code);
+      // AuthGate swaps to the signed-in shell once the user lands in context.
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not verify this code.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const resend = async () => {
+    if (busy) return;
+
+    setBusy(true);
+    setError(null);
+
+    try {
+      await resendVerification(pendingEmail);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not resend the code.");
     } finally {
       setBusy(false);
     }
@@ -89,7 +131,8 @@ export function RegisterSheet({
 
           <View style={styles.header}>
             <Text style={styles.title}>
-              Start your index<Text style={styles.accent}>.</Text>
+              {step === "verify" ? "Check your email" : "Start your index"}
+              <Text style={styles.accent}>.</Text>
             </Text>
             <Pressable
               onPress={close}
@@ -102,10 +145,68 @@ export function RegisterSheet({
           </View>
 
           <Text style={styles.body}>
-            Create one account for every format. The same profile works on the web and on this
-            device.
+            {step === "verify"
+              ? `We sent an 8-character code to ${pendingEmail}. It expires in 15 minutes.`
+              : "Create one account for every format. The same profile works on the web and on this device."}
           </Text>
 
+          {step === "verify" ? (
+            <View style={styles.verifyBody}>
+              <Text maxFontSizeMultiplier={KueTextScale.control} style={styles.label}>
+                Verification code
+              </Text>
+              <TextInput
+                value={code}
+                onChangeText={setCode}
+                placeholder="XXXX-XXXX"
+                placeholderTextColor={KueColors.ink3}
+                maxFontSizeMultiplier={KueTextScale.control}
+                autoCapitalize="characters"
+                autoComplete="one-time-code"
+                autoCorrect={false}
+                maxLength={9}
+                returnKeyType="go"
+                onSubmitEditing={verify}
+                style={[styles.input, styles.codeInput]}
+              />
+
+              {error ? <Text style={styles.error}>{error}</Text> : null}
+
+              <View style={styles.submit}>
+                <LandingButton
+                  label="Verify email"
+                  onPress={verify}
+                  size="lg"
+                  fullWidth
+                  busy={busy}
+                  disabled={!codeOk}
+                />
+              </View>
+
+              <View style={styles.verifyLinks}>
+                <Pressable
+                  onPress={resend}
+                  disabled={busy}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel="Resend verification code">
+                  <Text style={styles.verifyLink}>Resend code</Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => {
+                    setStep("form");
+                    setCode("");
+                    setError(null);
+                  }}
+                  disabled={busy}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel="Use a different email">
+                  <Text style={styles.verifyLinkMuted}>Use a different email</Text>
+                </Pressable>
+              </View>
+            </View>
+          ) : (
           <ScrollView
             style={styles.formScroll}
             contentContainerStyle={styles.form}
@@ -209,6 +310,7 @@ export function RegisterSheet({
               />
             </View>
           </ScrollView>
+          )}
         </View>
       </KeyboardAvoidingView>
     </Modal>
@@ -291,6 +393,26 @@ const styles = StyleSheet.create({
   },
   passwordRow: { position: "relative", justifyContent: "center" },
   passwordInput: { paddingRight: 48 },
+  verifyBody: { paddingTop: 4, paddingBottom: 4 },
+  codeInput: {
+    fontVariant: ["tabular-nums"],
+    letterSpacing: 3,
+  },
+  verifyLinks: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 16,
+    marginTop: 16,
+  },
+  verifyLink: {
+    color: KueColors.accent,
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  verifyLinkMuted: {
+    color: KueColors.ink2,
+    fontSize: 13,
+  },
   eye: {
     position: "absolute",
     right: 4,

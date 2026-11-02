@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { ForgotPasswordSheet } from "@/features/landing/forgot-password-sheet";
 import { LandingTour } from "@/features/landing/landing-tour";
 import { RegisterSheet } from "@/features/landing/register-sheet";
 import { SignInSheet } from "@/features/landing/sign-in-sheet";
@@ -12,6 +13,7 @@ import { SignInSheet } from "@/features/landing/sign-in-sheet";
 export function LandingExperience() {
   const [signInOpen, setSignInOpen] = useState(false);
   const [registerOpen, setRegisterOpen] = useState(false);
+  const [forgotOpen, setForgotOpen] = useState(false);
 
   return (
     <>
@@ -19,8 +21,23 @@ export function LandingExperience() {
         onSignIn={() => setSignInOpen(true)}
         onRegister={() => setRegisterOpen(true)}
       />
-      <SignInSheet visible={signInOpen} onClose={() => setSignInOpen(false)} />
+      <SignInSheet
+        visible={signInOpen}
+        onClose={() => setSignInOpen(false)}
+        onForgotPassword={() => {
+          setSignInOpen(false);
+          setForgotOpen(true);
+        }}
+      />
       <RegisterSheet visible={registerOpen} onClose={() => setRegisterOpen(false)} />
+      <ForgotPasswordSheet
+        visible={forgotOpen}
+        onClose={() => setForgotOpen(false)}
+        onSignIn={() => {
+          setForgotOpen(false);
+          setSignInOpen(true);
+        }}
+      />
     </>
   );
 }

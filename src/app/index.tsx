@@ -1,4 +1,5 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { KueColors, KueFonts, KueSpacing } from '@/constants/kue-theme';
@@ -26,6 +27,7 @@ function dateLabel(date: Date) {
 }
 
 export default function HomeScreen() {
+  const router = useRouter();
   const { user } = useAuth();
   const { contentWidth, gutter, scale } = useResponsive();
 
@@ -47,7 +49,14 @@ export default function HomeScreen() {
             </View>
             <View style={styles.headerActions}>
               <NotificationBell />
-              <UserAvatar username={user?.username ?? 'there'} avatarId={user?.avatarId} />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Open profile"
+                hitSlop={8}
+                onPress={() => router.push('/profile')}
+                style={({ pressed }) => [pressed && styles.pressed]}>
+                <UserAvatar username={user?.username ?? 'there'} avatarId={user?.avatarId} />
+              </Pressable>
             </View>
           </View>
 
@@ -130,5 +139,8 @@ const styles = StyleSheet.create({
   },
   sections: {
     gap: KueSpacing.xxl,
+  },
+  pressed: {
+    opacity: 0.7,
   },
 });

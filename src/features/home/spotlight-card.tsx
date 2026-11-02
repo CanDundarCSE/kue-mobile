@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
 import { Check, Plus } from 'lucide-react-native';
 import { useState } from 'react';
 import {
@@ -23,6 +24,7 @@ import {
   type MediaItem,
 } from '@/lib/api/home';
 import { lightHaptic } from '@/lib/haptics';
+import { mediaHref } from '@/lib/media-href';
 
 import { ErrorLine } from './continue-card';
 import { SectionLabel } from './section-label';
@@ -51,6 +53,7 @@ function subtitle(item: MediaItem) {
 }
 
 export function SpotlightCard() {
+  const router = useRouter();
   const { width } = useWindowDimensions();
   const queryClient = useQueryClient();
   const [added, setAdded] = useState<Record<string, true>>({});
@@ -121,7 +124,11 @@ export function SpotlightCard() {
               contentContainerStyle={styles.rail}>
               {data.items.map((item) => (
                 <View key={mediaKey(item)} style={{ width: itemWidth }}>
-                  <View style={styles.posterWrap}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`Open ${item.title}`}
+                    onPress={() => router.push(mediaHref(item))}
+                    style={({ pressed }) => [pressed && styles.pressed]}>
                     <View style={styles.poster}>
                       {item.coverImage ? (
                         <Image source={{ uri: item.coverImage }} style={StyleSheet.absoluteFill} contentFit="cover" />
@@ -129,27 +136,27 @@ export function SpotlightCard() {
                         <Text style={styles.posterFallback}>{item.title.charAt(0)}</Text>
                       )}
                     </View>
-                    <Pressable
-                      accessibilityRole="button"
-                      accessibilityLabel={`Add ${item.title} to planning`}
-                      onPress={() => void add(item)}
-                      hitSlop={6}
-                      style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}>
-                      {addingKey === mediaKey(item) ? (
-                        <ActivityIndicator color={KueColors.foreground} size="small" />
-                      ) : added[mediaKey(item)] ? (
-                        <Check color={KueColors.accent} size={14} strokeWidth={2.5} />
-                      ) : (
-                        <Plus color={KueColors.foreground} size={14} strokeWidth={2} />
-                      )}
-                    </Pressable>
-                  </View>
-                  <Text style={styles.itemTitle} numberOfLines={2}>
-                    {item.title}
-                  </Text>
-                  <Text style={styles.itemMeta} numberOfLines={1}>
-                    {subtitle(item)}
-                  </Text>
+                    <Text style={styles.itemTitle} numberOfLines={2}>
+                      {item.title}
+                    </Text>
+                    <Text style={styles.itemMeta} numberOfLines={1}>
+                      {subtitle(item)}
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`Add ${item.title} to planning`}
+                    onPress={() => void add(item)}
+                    hitSlop={6}
+                    style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}>
+                    {addingKey === mediaKey(item) ? (
+                      <ActivityIndicator color={KueColors.foreground} size="small" />
+                    ) : added[mediaKey(item)] ? (
+                      <Check color={KueColors.accent} size={14} strokeWidth={2.5} />
+                    ) : (
+                      <Plus color={KueColors.foreground} size={14} strokeWidth={2} />
+                    )}
+                  </Pressable>
                 </View>
               ))}
             </ScrollView>
@@ -194,9 +201,6 @@ const styles = StyleSheet.create({
     gap: RAIL_GAP,
     paddingTop: KueSpacing.xs,
     paddingHorizontal: KueSpacing.xl,
-  },
-  posterWrap: {
-    borderRadius: 12,
   },
   poster: {
     width: '100%',
